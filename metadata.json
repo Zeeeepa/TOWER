@@ -1,0 +1,5 @@
+{
+  "name": "TOWER - Compute Tower",
+  "description": "A centralized dashboard for converting web-based chat interfaces into programmatic OpenAI-compatible APIs using Agentic Vision analysis.",
+  "requestFramePermissions": []
+}
