@@ -1,0 +1,622 @@
+# =============================================================================
+# Owl Browser CI Workflow
+# =============================================================================
+# Runs on push to main/develop and pull requests
+# Builds and tests across macOS (ARM64/x64) and Ubuntu (x64)
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  CMAKE_VERSION: '3.28'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Lint & Format Check
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check (SDK)
+        run: cd sdk && npm ci && npm run build
+
+      - name: Check for common issues
+        run: |
+          # Check for debug code left in
+          echo "Checking for debug code..."
+          ! grep -r "console\.log" src/*.cjs --include="*.cjs" 2>/dev/null | grep -v "// debug" || echo "Warning: console.log found"
+
+          # Check package.json syntax
+          node -e "JSON.parse(require('fs').readFileSync('package.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('sdk/package.json'))"
+
+  # ---------------------------------------------------------------------------
+  # Build macOS (ARM64 and x64)
+  # ---------------------------------------------------------------------------
+  build-macos:
+    name: Build macOS (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-14
+          - arch: x64
+            runner: macos-13
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install system dependencies
+        run: |
+          brew install cmake libmaxminddb sqlcipher curl
+
+      - name: Cache CEF
+        uses: actions/cache@v4
+        id: cef-cache
+        with:
+          path: third_party/cef_macos
+          key: cef-macos-${{ matrix.arch }}-${{ hashFiles('scripts/download-cef.cjs') }}
+          restore-keys: |
+            cef-macos-${{ matrix.arch }}-
+
+      - name: Download CEF
+        if: steps.cef-cache.outputs.cache-hit != 'true'
+        run: npm run download:cef
+
+      - name: Cache build
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: build-macos-${{ matrix.arch }}-${{ hashFiles('CMakeLists.txt', 'src/**/*.cc', 'src/**/*.h', 'include/**/*.h') }}
+          restore-keys: |
+            build-macos-${{ matrix.arch }}-
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build browser (headless)
+        run: npm run build
+        env:
+          OWL_NONCE_HMAC_SECRET: ${{ secrets.OWL_NONCE_HMAC_SECRET }}
+
+      - name: Build HTTP server
+        run: npm run build:http
+
+      - name: Build MCP standalone
+        run: npm run build:mcp
+
+      - name: Verify build outputs
+        run: |
+          echo "Checking build outputs..."
+          ls -la build/Release/ || ls -la build/
+          test -f build/Release/owl_browser.app/Contents/MacOS/owl_browser || \
+            (echo "ERROR: owl_browser not found" && exit 1)
+          echo "Build verification passed!"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: owl-browser-macos-${{ matrix.arch }}
+          path: |
+            build/Release/owl_browser.app
+            build/Release/owl_http_server
+            dist/mcp-server-standalone.cjs
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Build Ubuntu (x64)
+  # ---------------------------------------------------------------------------
+  build-ubuntu:
+    name: Build Ubuntu (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake pkg-config \
+            libmaxminddb-dev libsqlcipher-dev \
+            libssl-dev libcurl4-openssl-dev zlib1g-dev uuid-dev \
+            libgtk-3-dev librsvg2-dev libglib2.0-dev \
+            libnspr4-dev libnss3-dev libatk1.0-dev libatk-bridge2.0-dev \
+            libcups2-dev libdrm-dev libxkbcommon-dev libxcomposite-dev \
+            libxdamage-dev libxrandr-dev libgbm-dev libpango1.0-dev libasound2-dev
+
+      - name: Cache CEF
+        uses: actions/cache@v4
+        id: cef-cache
+        with:
+          path: third_party/cef_linux
+          key: cef-linux-${{ matrix.arch }}-${{ hashFiles('scripts/download-cef.cjs') }}
+          restore-keys: |
+            cef-linux-${{ matrix.arch }}-
+
+      - name: Download CEF
+        if: steps.cef-cache.outputs.cache-hit != 'true'
+        run: npm run download:cef
+
+      - name: Cache build
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: build-linux-${{ matrix.arch }}-${{ hashFiles('CMakeLists.txt', 'src/**/*.cc', 'src/**/*.h', 'include/**/*.h') }}
+          restore-keys: |
+            build-linux-${{ matrix.arch }}-
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build browser (headless)
+        run: npm run build
+        env:
+          OWL_NONCE_HMAC_SECRET: ${{ secrets.OWL_NONCE_HMAC_SECRET }}
+
+      - name: Build HTTP server
+        run: npm run build:http
+
+      - name: Verify build outputs
+        run: |
+          echo "Checking build outputs..."
+          ls -la build/
+          test -f build/owl_browser || (echo "ERROR: owl_browser not found" && exit 1)
+          test -f build/owl_http_server || (echo "ERROR: owl_http_server not found" && exit 1)
+          echo "Build verification passed!"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: owl-browser-ubuntu-${{ matrix.arch }}
+          path: |
+            build/owl_browser
+            build/owl_http_server
+            build/*.so*
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Test macOS
+  # ---------------------------------------------------------------------------
+  test-macos:
+    name: Test macOS (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    needs: build-macos
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-14
+          - arch: x64
+            runner: macos-13
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install system dependencies
+        run: brew install libmaxminddb
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: owl-browser-macos-${{ matrix.arch }}
+          path: build/Release
+
+      - name: Make binaries executable
+        run: |
+          chmod +x build/Release/owl_browser.app/Contents/MacOS/owl_browser
+          chmod +x build/Release/owl_http_server 2>/dev/null || true
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Cache CEF (for test resources)
+        uses: actions/cache@v4
+        with:
+          path: third_party/cef_macos
+          key: cef-macos-${{ matrix.arch }}-${{ hashFiles('scripts/download-cef.cjs') }}
+
+      - name: Download CEF if not cached
+        run: |
+          if [ ! -d "third_party/cef_macos" ]; then
+            npm run download:cef
+          fi
+
+      - name: Run smoke tests
+        run: npm run ci:test:smoke
+        timeout-minutes: 5
+        env:
+          OWL_BROWSER_PATH: ${{ github.workspace }}/build/Release/owl_browser.app/Contents/MacOS/owl_browser
+
+      - name: Run core tests
+        run: npm run ci:test:core
+        timeout-minutes: 10
+        env:
+          OWL_BROWSER_PATH: ${{ github.workspace }}/build/Release/owl_browser.app/Contents/MacOS/owl_browser
+
+  # ---------------------------------------------------------------------------
+  # Test Ubuntu
+  # ---------------------------------------------------------------------------
+  test-ubuntu:
+    name: Test Ubuntu (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    needs: build-ubuntu
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libmaxminddb0 libsqlcipher0 libcurl4 libssl3 \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+            libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
+            libxrandr2 libgbm1 libpango-1.0-0 libasound2 \
+            xvfb
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: owl-browser-ubuntu-${{ matrix.arch }}
+          path: build
+
+      - name: Make binaries executable
+        run: |
+          chmod +x build/owl_browser
+          chmod +x build/owl_http_server
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Cache CEF (for test resources)
+        uses: actions/cache@v4
+        with:
+          path: third_party/cef_linux
+          key: cef-linux-${{ matrix.arch }}-${{ hashFiles('scripts/download-cef.cjs') }}
+
+      - name: Download CEF if not cached
+        run: |
+          if [ ! -d "third_party/cef_linux" ]; then
+            npm run download:cef
+          fi
+
+      - name: Run smoke tests with Xvfb
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+            npm run ci:test:smoke
+        timeout-minutes: 5
+        env:
+          OWL_BROWSER_PATH: ${{ github.workspace }}/build/owl_browser
+          LD_LIBRARY_PATH: ${{ github.workspace }}/build
+
+      - name: Run core tests with Xvfb
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+            npm run ci:test:core
+        timeout-minutes: 10
+        env:
+          OWL_BROWSER_PATH: ${{ github.workspace }}/build/owl_browser
+          LD_LIBRARY_PATH: ${{ github.workspace }}/build
+
+  # ---------------------------------------------------------------------------
+  # Test HTTP Server
+  # ---------------------------------------------------------------------------
+  test-http-server:
+    name: Test HTTP Server
+    runs-on: ubuntu-22.04
+    needs: build-ubuntu
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libmaxminddb0 libsqlcipher0 libcurl4 libssl3 \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+            libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
+            libxrandr2 libgbm1 libpango-1.0-0 libasound2 \
+            xvfb curl
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: owl-browser-ubuntu-x64
+          path: build
+
+      - name: Make binaries executable
+        run: |
+          chmod +x build/owl_browser
+          chmod +x build/owl_http_server
+
+      - name: Cache CEF (for resources)
+        uses: actions/cache@v4
+        with:
+          path: third_party/cef_linux
+          key: cef-linux-x64-${{ hashFiles('scripts/download-cef.cjs') }}
+
+      - name: Setup CEF resources
+        run: |
+          # Copy CEF resources to build directory if needed
+          if [ -d "third_party/cef_linux" ]; then
+            cp -r third_party/cef_linux/Resources/* build/ 2>/dev/null || true
+            cp -r third_party/cef_linux/Release/*.so* build/ 2>/dev/null || true
+          fi
+
+      - name: Start HTTP server
+        run: |
+          export LD_LIBRARY_PATH="${{ github.workspace }}/build:$LD_LIBRARY_PATH"
+          export OWL_BROWSER_PATH="${{ github.workspace }}/build/owl_browser"
+          export OWL_HTTP_TOKEN="ci-test-token-${{ github.run_id }}"
+          export OWL_HTTP_HOST="127.0.0.1"
+          export OWL_HTTP_PORT="8080"
+          export OWL_DEV_MODE="true"
+
+          # Start server in background with xvfb
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+            ./build/owl_http_server &
+          echo $! > /tmp/http_server.pid
+          echo "HTTP server started with PID $(cat /tmp/http_server.pid)"
+
+          # Wait for server to be ready
+          echo "Waiting for server to start..."
+          for i in {1..30}; do
+            if curl -sf http://127.0.0.1:8080/health > /dev/null 2>&1; then
+              echo "Server is ready!"
+              break
+            fi
+            echo "Attempt $i: Server not ready yet..."
+            sleep 2
+          done
+        env:
+          OWL_HTTP_TOKEN: ci-test-token-${{ github.run_id }}
+
+      - name: Test health endpoint
+        run: |
+          RESPONSE=$(curl -sf http://127.0.0.1:8080/health)
+          echo "Health response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q "ok\|healthy\|running"; then
+            echo "Health check passed!"
+          else
+            echo "Health check returned unexpected response"
+            exit 1
+          fi
+
+      - name: Test API endpoint
+        run: |
+          # Test creating a browser context
+          RESPONSE=$(curl -sf -X POST \
+            -H "Authorization: Bearer ci-test-token-${{ github.run_id }}" \
+            -H "Content-Type: application/json" \
+            http://127.0.0.1:8080/execute/browser_create_context 2>&1) || true
+
+          echo "API response: $RESPONSE"
+
+          # Check if response contains a context ID or success indicator
+          if echo "$RESPONSE" | grep -qE "ctx_|context|success|result"; then
+            echo "API test passed!"
+          else
+            echo "API test - response received (may require browser for full test)"
+          fi
+        continue-on-error: true
+
+      - name: Stop HTTP server
+        if: always()
+        run: |
+          if [ -f /tmp/http_server.pid ]; then
+            PID=$(cat /tmp/http_server.pid)
+            kill "$PID" 2>/dev/null || true
+            echo "HTTP server stopped"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Build & Test SDK
+  # ---------------------------------------------------------------------------
+  sdk-build:
+    name: Build & Test SDK
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: sdk/package-lock.json
+
+      - name: Install SDK dependencies
+        run: cd sdk && npm ci
+
+      - name: Build SDK
+        run: cd sdk && npm run build
+
+      - name: Run SDK type check
+        run: cd sdk && npx tsc --noEmit
+
+      - name: Verify SDK exports
+        run: |
+          cd sdk
+          node -e "const sdk = require('./dist/index.js'); console.log('SDK exports:', Object.keys(sdk));"
+
+      - name: Upload SDK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: owl-browser-sdk
+          path: sdk/dist
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Build & Test Python SDK
+  # ---------------------------------------------------------------------------
+  python-sdk-build:
+    name: Build & Test Python SDK
+    runs-on: ubuntu-latest
+    needs: lint
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.11', '3.12']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: python-sdk/pyproject.toml
+
+      - name: Install dependencies
+        run: |
+          cd python-sdk
+          python -m pip install --upgrade pip
+          pip install build twine
+          pip install -e ".[dev]"
+
+      - name: Run linting (ruff)
+        run: |
+          cd python-sdk
+          ruff check owl_browser/
+
+      - name: Run type checking (mypy)
+        run: |
+          cd python-sdk
+          mypy owl_browser/ --ignore-missing-imports
+
+      - name: Run formatting check (black)
+        run: |
+          cd python-sdk
+          black --check owl_browser/
+
+      - name: Build package
+        run: |
+          cd python-sdk
+          python -m build
+
+      - name: Verify package
+        run: |
+          cd python-sdk
+          twine check dist/*
+
+      - name: Upload Python SDK artifact
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: owl-browser-python-sdk
+          path: python-sdk/dist
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # CI Success Gate
+  # ---------------------------------------------------------------------------
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [build-macos, build-ubuntu, test-macos, test-ubuntu, test-http-server, sdk-build, python-sdk-build]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.build-macos.result }}" != "success" ]; then
+            echo "macOS build failed"
+            exit 1
+          fi
+          if [ "${{ needs.build-ubuntu.result }}" != "success" ]; then
+            echo "Ubuntu build failed"
+            exit 1
+          fi
+          if [ "${{ needs.test-macos.result }}" != "success" ]; then
+            echo "macOS tests failed"
+            exit 1
+          fi
+          if [ "${{ needs.test-ubuntu.result }}" != "success" ]; then
+            echo "Ubuntu tests failed"
+            exit 1
+          fi
+          if [ "${{ needs.test-http-server.result }}" != "success" ]; then
+            echo "HTTP server tests failed"
+            exit 1
+          fi
+          if [ "${{ needs.sdk-build.result }}" != "success" ]; then
+            echo "Node.js SDK build failed"
+            exit 1
+          fi
+          if [ "${{ needs.python-sdk-build.result }}" != "success" ]; then
+            echo "Python SDK build failed"
+            exit 1
+          fi
+          echo "All CI jobs passed successfully!"

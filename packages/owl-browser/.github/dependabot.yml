@@ -1,0 +1,139 @@
+# =============================================================================
+# Dependabot Configuration
+# =============================================================================
+# Automatically creates PRs for dependency updates
+# =============================================================================
+
+version: 2
+
+updates:
+  # Root npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        patterns:
+          - "@types/*"
+          - "typescript"
+          - "jest"
+          - "esbuild"
+        update-types:
+          - "minor"
+          - "patch"
+      mcp-sdk:
+        patterns:
+          - "@modelcontextprotocol/*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "npm"
+
+  # Python SDK dependencies
+  - package-ecosystem: "pip"
+    directory: "/python-sdk"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    groups:
+      python-dev-dependencies:
+        patterns:
+          - "pytest*"
+          - "black"
+          - "isort"
+          - "mypy"
+          - "ruff"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "deps(python-sdk)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+      - "sdk"
+
+  # SDK npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/sdk"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    groups:
+      sdk-dev-dependencies:
+        patterns:
+          - "@types/*"
+          - "typescript"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "deps(sdk)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "npm"
+      - "sdk"
+
+  # Docker frontend dependencies
+  - package-ecosystem: "npm"
+    directory: "/docker/frontend"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    groups:
+      frontend-dependencies:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+          - "vite"
+          - "tailwindcss"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "deps(frontend)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "npm"
+      - "frontend"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"

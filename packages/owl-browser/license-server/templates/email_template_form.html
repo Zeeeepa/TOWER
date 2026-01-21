@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Email Template - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('email_templates_list') }}">Email Templates</a></li>
+            <li class="breadcrumb-item active">{{ template.name|replace('_', ' ')|title }}</li>
+        </ol>
+    </nav>
+    <h2 class="glow-text mb-1">Edit Email Template</h2>
+    <p class="text-muted mb-0">{{ template.name|replace('_', ' ')|title }}</p>
+</div>
+
+<form method="POST">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-envelope me-2"></i>Template Content</h5>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
+                               {{ 'checked' if template.is_active }}>
+                        <label class="form-check-label" for="is_active">Active</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Subject Line <span class="text-danger">*</span></label>
+                        <input type="text" name="subject" class="form-control" required
+                               value="{{ template.subject }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">HTML Body</label>
+                        <textarea name="body_html" class="form-control font-monospace" rows="12"
+                                  placeholder="HTML version of the email">{{ template.body_html }}</textarea>
+                        <div class="form-text">HTML version for rich email clients</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Plain Text Body <span class="text-danger">*</span></label>
+                        <textarea name="body_text" class="form-control font-monospace" rows="8" required
+                                  placeholder="Plain text version of the email">{{ template.body_text }}</textarea>
+                        <div class="form-text">Plain text fallback for all email clients</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Save Template
+                </button>
+                <a href="{{ url_for('email_templates_list') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-transparent">
+                    <h6 class="mb-0"><i class="bi bi-code-slash me-2"></i>Variables</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Click to copy:</p>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{customer_name}}">
+                            customer_name
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{customer_email}}">
+                            customer_email
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{company_name}}">
+                            company_name
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{license_id}}">
+                            license_id
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{license_type}}">
+                            license_type
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{expiry_date}}">
+                            expiry_date
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{seats}}">
+                            seats
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{plan_name}}">
+                            plan_name
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{amount}}">
+                            amount
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary var-btn" data-var="{{renewal_date}}">
+                            renewal_date
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Template Info</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Template Name</small>
+                        <code>{{ template.name }}</code>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Created</small>
+                        {{ template.created_at|datetime if template.created_at else 'Unknown' }}
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Last Updated</small>
+                        {{ template.updated_at|datetime if template.updated_at else 'Never' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variable buttons - copy to clipboard
+    document.querySelectorAll('.var-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const varText = this.dataset.var;
+            navigator.clipboard.writeText(varText).then(() => {
+                const originalText = this.textContent;
+                this.textContent = 'Copied!';
+                this.classList.add('btn-success');
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.classList.remove('btn-success');
+                }, 1000);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

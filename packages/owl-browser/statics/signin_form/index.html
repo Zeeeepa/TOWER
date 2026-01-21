@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - SecurePortal</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="signin-card">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="8" fill="url(#gradient)"/>
+                        <path d="M20 10L28 15V25L20 30L12 25V15L20 10Z" stroke="white" stroke-width="2" fill="none"/>
+                        <circle cx="20" cy="20" r="3" fill="white"/>
+                        <defs>
+                            <linearGradient id="gradient" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" style="stop-color:#667eea"/>
+                                <stop offset="100%" style="stop-color:#764ba2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h1>Welcome Back</h1>
+                <p class="subtitle">Sign in to your account</p>
+            </div>
+
+            <!-- Sign In Form -->
+            <form id="signinForm" class="signin-form">
+                <!-- Username/Email -->
+                <div class="form-group">
+                    <label for="username">Username or Email</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 10C12.21 10 14 8.21 14 6C14 3.79 12.21 2 10 2C7.79 2 6 3.79 6 6C6 8.21 7.79 10 10 10Z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M18 18C18 14.69 14.42 12 10 12C5.58 12 2 14.69 2 18" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Enter your username or email"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <rect x="4" y="8" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M7 8V6C7 4.34315 8.34315 3 10 3C11.6569 3 13 4.34315 13 6V8" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="10" cy="13" r="1.5" fill="currentColor"/>
+                        </svg>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            required
+                        >
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 7C8.34 7 7 8.34 7 10C7 11.66 8.34 13 10 13C11.66 13 13 11.66 13 10C13 8.34 11.66 7 10 7Z" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M10 3C4 3 1 10 1 10C1 10 4 17 10 17C16 17 19 10 19 10C19 10 16 3 10 3Z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe" name="rememberMe">
+                        <span class="checkbox-custom"></span>
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <!-- CAPTCHA -->
+                <div class="captcha-section">
+                    <label>Security Verification</label>
+                    <div class="captcha-container">
+                        <div class="captcha-image-wrapper">
+                            <img id="captchaImage" src="" alt="CAPTCHA" class="captcha-image">
+                            <button type="button" class="refresh-captcha" id="refreshCaptcha" title="Refresh CAPTCHA">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M17 10C17 13.866 13.866 17 10 17C6.134 17 3 13.866 3 10C3 6.134 6.134 3 10 3C11.848 3 13.551 3.711 14.828 4.879" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M14 1V5H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="captcha-input-wrapper">
+                            <input
+                                type="text"
+                                id="captchaInput"
+                                name="captcha"
+                                placeholder="Enter the characters above"
+                                maxlength="5"
+                                required
+                                autocomplete="off"
+                            >
+                            <div id="captchaError" class="captcha-error"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span>Sign In</span>
+                    <svg class="btn-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                <!-- Success/Error Messages -->
+                <div id="messageBox" class="message-box"></div>
+            </form>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>Don't have an account? <a href="test://user_form.html">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/captcha.js"></script>
+    <script src="js/signin.js"></script>
+</body>
+</html>

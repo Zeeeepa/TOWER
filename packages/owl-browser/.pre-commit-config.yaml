@@ -1,0 +1,61 @@
+# Pre-commit hooks for Owl Browser
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(third_party/|build/|dist/|node_modules/)
+      - id: end-of-file-fixer
+        exclude: ^(third_party/|build/|dist/|node_modules/)
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+        exclude: ^(models/|third_party/)
+
+  # GitHub Actions validation
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.4
+    hooks:
+      - id: actionlint
+
+  # Python SDK checks
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.2
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^python-sdk/
+      - id: ruff-format
+        files: ^python-sdk/
+
+  # Node.js/TypeScript checks
+  - repo: local
+    hooks:
+      - id: typescript-sdk
+        name: TypeScript SDK Check
+        entry: bash -c 'cd sdk && npm run build 2>/dev/null || echo "SDK build check (install deps first)"'
+        language: system
+        files: ^sdk/.*\.(ts|js)$
+        pass_filenames: false
+
+      - id: eslint-mcp
+        name: ESLint MCP Server
+        entry: bash -c 'node -c src/mcp-server.cjs 2>/dev/null || echo "Syntax check only"'
+        language: system
+        files: ^src/.*\.cjs$
+        pass_filenames: false
+
+  # Shell script checks
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: [-x]
+        exclude: ^(third_party/|node_modules/)

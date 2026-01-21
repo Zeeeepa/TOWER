@@ -1,0 +1,144 @@
+---
+title: "Self-Healing in TestDriver"
+sidebarTitle: "Self-Healing"
+description: "Learn how TestDriver's self-healing feature keeps your tests resilient and up-to-date with minimal manual effort."
+icon: "bandage"
+---
+
+Self-healing is a powerful feature in TestDriver that ensures your tests remain resilient even when the application under test changes.
+
+Use `--heal` to enable self-healing in your test runs. This feature allows TestDriver to automatically recover when minor changes occur, such as text updates or small UI adjustments, without requiring manual intervention.
+
+## Why use self-healing?
+
+In modern software development, applications frequently undergo changes, whether it's UI updates, text modifications, or layout adjustments. These changes can lead to test failures, requiring developers to manually update test scripts to reflect the new state of the application.
+
+This means that if a test fails due to a change in the application, TestDriver will attempt to recover by finding the updated element or text and retrying the action. If successful, it will update the test script accordingly.
+
+This feature is particularly useful in continuous integration (CI) environments, where tests need to adapt to frequent changes in the application.
+
+## How to enable self-healing
+
+To enable self-healing in TestDriver, simply add the `--heal` and `--write` flags when running your tests. The `--heal` flag instructs TestDriver to recover when test fail due to minor changes in the application, while `--write` saves newly generated steps to the test file.
+
+```bash
+npx testdriverai@latest run my-tests.yaml --heal --write
+```
+
+## How self-healing works
+
+When TestDriver steps fail, the AI will progressively fall back to attempt to complete the test.
+
+When running with `--heal` and `--write`, TestDriver will update the test files locally with any changes made during self-healing. You can then use GitHub Actions to commit these changes and create a pull request for review.
+
+## Benefits of self-healing
+
+- **Reduced Maintenance**: Eliminates the need for manual updates to tests when minor UI changes occur.
+- **Increased Test Resilience**: Ensures tests adapt to changes without breaking.
+- **Continuous Integration**: Keeps your test suite aligned with the latest application changes.
+- **Developer Collaboration**: Automatically opens a PR, allowing developers to review and approve updates.
+
+## How self-healing works
+
+1. **Test Execution**: TestDriver runs your test suite as usual.
+2. **Failure Detection**: If a test fails due to a change in the application (for example, text or UI updates), the AI identifies the failure point.
+3. **Recovery Attempt**: The AI uses its adaptive capabilities to locate the updated element or text and retries the action.
+4. **Test Update**: If the recovery is successful, TestDriver updates the test script with the new element or text.
+5. **Commit and PR**: GitHub Actions can detect the changes and automatically commit them and create a pull request for review.
+
+### Example: Button text changes from "Submit" to "Send"
+
+<Steps>
+<Step title="Initial Test">
+
+```yaml {2}
+- command: hover-text
+  text: Submit
+  description: Submit button in the form
+  action: click
+```
+
+</Step>
+<Step title="Application Update">
+  - The button text is changed from "Submit" to "Send" in the application.
+</Step>
+
+<Step title="Test Execution">
+  - TestDriver runs the test and fails to find the "Submit" button.
+</Step>
+
+<Step title="Self-Healing">
+  - The AI detects the failure and searches for a similar element based on the `description`.
+  - It identifies the "Send" button as the updated element and retries the action.
+</Step>
+<Step title="Test Update">
+  - The test script is updated to reflect the new button text:
+  
+  ```yaml {2}
+  - command: hover-text
+    text: Send
+    description: Submit button in the form
+    action: click
+  ```
+</Step>
+<Step title="Commit and PR Creation">
+   - GitHub Actions detects the changes and commits the updated test to a new branch and opens a PR:
+     - **Branch Name**: `auto-heal-update-submit-to-send`
+     - **PR Title**: `Auto-Healed Test: Updated "Submit" to "Send"`
+
+</Step>
+</Steps>
+## Example GitHub Action for self-healing
+
+Here's how you can configure a GitHub Action to enable self-healing and automatically create PRs for any test updates:
+
+```yaml
+name: TestDriver Self-Healing
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: "Run Tests with Self-Healing"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run TestDriver with Auto-Healing
+        run: npx testdriverai@latest run testdriver/onboarding.yaml --heal --write
+        env:
+          TD_API_KEY: ${{ secrets.TD_API_KEY }}
+
+      - name: Commit auto-healed changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add testdriver/
+          git diff --staged --quiet || git commit -m "Auto-healed test updates"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Auto-healed test updates"
+          title: "Self-Healed Test Updates"
+          branch: auto-heal-updates
+          base: main
+          body: |
+            This PR contains auto-healed test updates generated by TestDriver.
+
+            Please review the changes to ensure they are correct before merging.
+```
+
+---
+
+## Limitations of Self-Healing
+
+- **Major UI Overhauls**: Self-healing is best suited for minor changes (for example, text updates, small layout adjustments). Significant UI changes may still require manual intervention.
+- **Ambiguous Changes**: If multiple elements match the updated criteria, the AI may require additional context to make the correct decision.
+- **Step Deletion**: If UI or wizard pages are removed, the AI may not be able to recover. In such cases, manual updates are necessary.

@@ -1,0 +1,487 @@
+{% extends "base.html" %}
+
+{% block title %}New License - Owl License Admin{% endblock %}
+
+{% block extra_css %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<style>
+    /* Dark theme overrides for Select2 - matching brand colors */
+    .select2-container--bootstrap-5 .select2-selection {
+        background-color: var(--owl-bg-lighter, #152742);
+        border: 1px solid rgba(78, 145, 121, 0.3);
+        color: #fff;
+        min-height: 42px;
+        border-radius: 8px;
+    }
+    .select2-container--bootstrap-5 .select2-selection--single {
+        padding: 6px 12px;
+    }
+    .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+        color: #fff;
+        padding-left: 0;
+        line-height: 28px;
+    }
+    .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+        height: 40px;
+    }
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+    .select2-container--bootstrap-5.select2-container--open .select2-selection {
+        background-color: var(--owl-bg-light, #0F1F35);
+        border-color: var(--owl-primary, #4E9179);
+        box-shadow: 0 0 0 3px rgba(78, 145, 121, 0.25);
+    }
+    .select2-container--bootstrap-5 .select2-dropdown {
+        background-color: var(--owl-bg-lighter, #152742);
+        border: 1px solid rgba(78, 145, 121, 0.3);
+        border-radius: 8px;
+        margin-top: 4px;
+    }
+    .select2-container--bootstrap-5 .select2-results__option {
+        color: rgba(255, 255, 255, 0.9);
+        padding: 10px 12px;
+    }
+    .select2-container--bootstrap-5 .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--owl-primary, #4E9179);
+        color: #fff;
+    }
+    .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+        background-color: var(--owl-bg-light, #0F1F35);
+        border: 1px solid rgba(78, 145, 121, 0.3);
+        color: #fff;
+        border-radius: 6px;
+        padding: 8px 12px;
+    }
+    .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field:focus {
+        border-color: var(--owl-primary, #4E9179);
+        box-shadow: 0 0 0 2px rgba(78, 145, 121, 0.2);
+    }
+    .select2-container--bootstrap-5 .select2-results__option[aria-selected=true] {
+        background-color: rgba(78, 145, 121, 0.2);
+    }
+    .select2-container--bootstrap-5 .select2-selection__placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="mb-4">
+            <a href="{{ url_for('licenses_list') }}" class="text-muted text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i>Back to Licenses
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h4 class="mb-0">
+                    <i class="bi bi-plus-circle me-2 text-primary"></i>Create New License
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <!-- Licensee Information -->
+                    <h5 class="text-muted mb-3">
+                        <i class="bi bi-person me-2"></i>Licensee Information
+                    </h5>
+
+                    <div class="row g-3 mb-4">
+                        <!-- Customer Selection -->
+                        <div class="col-12">
+                            <label class="form-label">Select Customer</label>
+                            <select name="customer_id" class="form-select" id="customerSelect">
+                                <option value="">-- New Customer (enter details below) --</option>
+                                {% for customer in customers %}
+                                <option value="{{ customer.id }}"
+                                        data-name="{{ customer.name }}"
+                                        data-email="{{ customer.email }}"
+                                        data-company="{{ customer.company or '' }}"
+                                        {{ 'selected' if form_data.get('customer_id') == customer.id }}>
+                                    {{ customer.name }} ({{ customer.email }}){% if customer.company %} - {{ customer.company }}{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select an existing customer or enter new customer details below.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" id="customerName"
+                                   value="{{ form_data.get('name', '') }}"
+                                   placeholder="John Doe" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" id="customerEmail"
+                                   value="{{ form_data.get('email', '') }}"
+                                   placeholder="john@example.com" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Organization</label>
+                            <input type="text" name="organization" class="form-control" id="customerOrg"
+                                   value="{{ form_data.get('organization', '') }}"
+                                   placeholder="Acme Corporation">
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-4">
+
+                    <!-- License Configuration -->
+                    <h5 class="text-muted mb-3">
+                        <i class="bi bi-gear me-2"></i>License Configuration
+                    </h5>
+
+                    <div class="row g-3 mb-4">
+                        <!-- Billing Plan Selection -->
+                        <div class="col-12">
+                            <label class="form-label">Billing Plan</label>
+                            <select name="plan_id" class="form-select" id="planSelect" onchange="updateFromPlan()">
+                                <option value="">-- No Plan (manual configuration) --</option>
+                                {% for plan in billing_plans %}
+                                <option value="{{ plan.id }}"
+                                        data-license-type="{{ plan.license_type }}"
+                                        data-max-seats="{{ plan.max_seats }}"
+                                        data-price-monthly="{{ plan.price_monthly }}"
+                                        data-price-yearly="{{ plan.price_yearly }}"
+                                        {{ 'selected' if form_data.get('plan_id') == plan.id }}>
+                                    {{ plan.display_name }} - ${{ '%.2f'|format(plan.price_monthly) }}/mo (${{ '%.2f'|format(plan.price_yearly) }}/yr) - {{ plan.max_seats }} seat(s)
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select a billing plan to auto-fill license type and seats, or configure manually below.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">License Type <span class="text-danger">*</span></label>
+                            <select name="license_type" class="form-select" id="licenseType" onchange="updateForm()">
+                                {% for type_id, type_name in license_types.items() %}
+                                <option value="{{ type_id }}"
+                                        {{ 'selected' if form_data.get('license_type') == type_id|string }}>
+                                    {{ type_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text" id="typeDescription">
+                                Select the license type based on the customer's plan.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Max Seats</label>
+                            <input type="number" name="max_seats" class="form-control" id="maxSeats"
+                                   value="{{ form_data.get('max_seats', 1) }}"
+                                   min="1" max="1000">
+                            <div class="form-text">Number of devices that can use this license.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Expiry (Days)</label>
+                            <input type="number" name="expiry_days" class="form-control"
+                                   value="{{ form_data.get('expiry_days', 365) }}"
+                                   min="0" max="3650" id="expiryDays">
+                            <div class="form-text">0 = perpetual (never expires)</div>
+                        </div>
+                        <div class="col-md-6" id="gracePeriodField" style="display: none;">
+                            <label class="form-label">Grace Period (Days)</label>
+                            <input type="number" name="grace_period" class="form-control"
+                                   value="{{ form_data.get('grace_period', 7) }}"
+                                   min="0" max="30">
+                            <div class="form-text">Days to allow offline use if server unreachable.</div>
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" name="hardware_bound" class="form-check-input"
+                                   id="hardwareBound" {{ 'checked' if form_data.get('hardware_bound') }}
+                                   onchange="toggleHardwareId()">
+                            <label class="form-check-label" for="hardwareBound">
+                                <i class="bi bi-cpu me-1"></i>Hardware Bound
+                            </label>
+                            <div class="form-text">Lock license to specific hardware.</div>
+                        </div>
+
+                        <!-- Hardware ID input (shown when Hardware Bound is checked) -->
+                        <div id="hardwareIdField" class="mt-3" style="display: none;">
+                            <label class="form-label">Hardware ID</label>
+                            <input type="text" name="hardware_id" class="form-control font-monospace"
+                                   id="hardwareId"
+                                   value="{{ form_data.get('hardware_id', '') }}"
+                                   placeholder="e.g., ABC123-DEF456-GHI789">
+                            <div class="form-text">
+                                The unique hardware identifier for this license.
+                                Leave blank to allow the first activation to set it automatically.
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-4">
+
+                    <!-- Version 2 Extended Metadata -->
+                    <h5 class="text-muted mb-3">
+                        <i class="bi bi-sliders me-2"></i>Extended Metadata (v2)
+                        <button type="button" class="btn btn-sm btn-outline-secondary ms-2"
+                                data-bs-toggle="collapse" data-bs-target="#extendedMetadata">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </h5>
+
+                    <div class="collapse" id="extendedMetadata">
+                        <!-- Version Control -->
+                        <div class="card mb-3 bg-transparent border-secondary">
+                            <div class="card-header bg-transparent border-secondary py-2">
+                                <small class="text-muted"><i class="bi bi-code-slash me-1"></i>Version Control</small>
+                            </div>
+                            <div class="card-body py-3">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Min Browser Version</label>
+                                        <input type="text" name="min_browser_version" class="form-control"
+                                               value="{{ form_data.get('min_browser_version', '') }}"
+                                               placeholder="e.g., 1.0.0">
+                                        <div class="form-text">Minimum browser version required.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Max Browser Version</label>
+                                        <input type="text" name="max_browser_version" class="form-control"
+                                               value="{{ form_data.get('max_browser_version', '') }}"
+                                               placeholder="e.g., 2.0.0 (empty = no limit)">
+                                        <div class="form-text">Maximum browser version allowed.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Geographic & Compliance -->
+                        <div class="card mb-3 bg-transparent border-secondary">
+                            <div class="card-header bg-transparent border-secondary py-2">
+                                <small class="text-muted"><i class="bi bi-globe me-1"></i>Geographic & Compliance</small>
+                            </div>
+                            <div class="card-body py-3">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Allowed Regions</label>
+                                        <input type="text" name="allowed_regions" class="form-control"
+                                               value="{{ form_data.get('allowed_regions', '') }}"
+                                               placeholder="e.g., US,EU,CA (empty = all)">
+                                        <div class="form-text">Comma-separated region codes.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Export Control</label>
+                                        <input type="text" name="export_control" class="form-control"
+                                               value="{{ form_data.get('export_control', '') }}"
+                                               placeholder="e.g., EAR99">
+                                        <div class="form-text">Export control classification.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Business Metadata -->
+                        <div class="card mb-3 bg-transparent border-secondary">
+                            <div class="card-header bg-transparent border-secondary py-2">
+                                <small class="text-muted"><i class="bi bi-briefcase me-1"></i>Business Metadata</small>
+                            </div>
+                            <div class="card-body py-3">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Order ID</label>
+                                        <input type="text" name="order_id" class="form-control"
+                                               value="{{ form_data.get('order_id', '') }}"
+                                               placeholder="ORD-12345">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Invoice ID</label>
+                                        <input type="text" name="invoice_id" class="form-control"
+                                               value="{{ form_data.get('invoice_id', '') }}"
+                                               placeholder="INV-12345">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Reseller ID</label>
+                                        <input type="text" name="reseller_id" class="form-control"
+                                               value="{{ form_data.get('reseller_id', '') }}"
+                                               placeholder="Partner/reseller ID">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Support & Maintenance -->
+                        <div class="card mb-3 bg-transparent border-secondary">
+                            <div class="card-header bg-transparent border-secondary py-2">
+                                <small class="text-muted"><i class="bi bi-headset me-1"></i>Support & Maintenance</small>
+                            </div>
+                            <div class="card-body py-3">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Support Tier</label>
+                                        <select name="support_tier" class="form-select">
+                                            <option value="0" {{ 'selected' if form_data.get('support_tier', '0') == '0' }}>None</option>
+                                            <option value="1" {{ 'selected' if form_data.get('support_tier') == '1' }}>Basic</option>
+                                            <option value="2" {{ 'selected' if form_data.get('support_tier') == '2' }}>Standard</option>
+                                            <option value="3" {{ 'selected' if form_data.get('support_tier') == '3' }}>Premium</option>
+                                            <option value="4" {{ 'selected' if form_data.get('support_tier') == '4' }}>Enterprise</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Support Expiry (Days)</label>
+                                        <input type="number" name="support_expiry_days" class="form-control"
+                                               value="{{ form_data.get('support_expiry_days', 365) }}"
+                                               min="0" max="3650">
+                                        <div class="form-text">0 = same as license</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Maintenance Expiry (Days)</label>
+                                        <input type="number" name="maintenance_expiry_days" class="form-control"
+                                               value="{{ form_data.get('maintenance_expiry_days', 365) }}"
+                                               min="0" max="3650">
+                                        <div class="form-text">0 = same as license</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" name="maintenance_included" class="form-check-input"
+                                                   id="maintenanceIncluded" {{ 'checked' if form_data.get('maintenance_included') }}>
+                                            <label class="form-check-label" for="maintenanceIncluded">
+                                                Include Maintenance/Updates
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-4">
+
+                    <!-- Notes -->
+                    <h5 class="text-muted mb-3">
+                        <i class="bi bi-sticky me-2"></i>Notes
+                    </h5>
+
+                    <div class="mb-4">
+                        <textarea name="notes" class="form-control" rows="3"
+                                  placeholder="Internal notes about this license...">{{ form_data.get('notes', '') }}</textarea>
+                    </div>
+
+                    <!-- Subscription Info -->
+                    <div id="subscriptionInfo" class="alert alert-info" style="display: none;">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Subscription License:</strong> This license will require periodic server validation.
+                        Monthly checks will occur on the anniversary of activation. The license will be automatically
+                        registered in the subscription database.
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('licenses_list') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Create License
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- jQuery (required for Select2) -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+const typeDescriptions = {
+    0: 'Trial license for evaluation purposes. Limited features and duration.',
+    1: 'Starter license - Monthly subscription ($1,999/mo, 3 device seats).',
+    2: 'Business license - One-time $19,999 + optional $3,999/mo maintenance (10 seats, 1 year).',
+    3: 'Enterprise license - One-time $49,999 + optional $9,999/mo maintenance (50 seats, 1 year).',
+    4: 'Developer license for building applications with Owl Browser.',
+    5: 'Subscription license with monthly server validation. Perfect for SaaS.'
+};
+
+function fillCustomerInfo(customerId) {
+    if (customerId) {
+        // Find the option with this value
+        const option = document.querySelector('#customerSelect option[value="' + customerId + '"]');
+        if (option) {
+            document.getElementById('customerName').value = option.dataset.name || '';
+            document.getElementById('customerEmail').value = option.dataset.email || '';
+            document.getElementById('customerOrg').value = option.dataset.company || '';
+        }
+    } else {
+        // Clear fields for new customer
+        document.getElementById('customerName').value = '';
+        document.getElementById('customerEmail').value = '';
+        document.getElementById('customerOrg').value = '';
+    }
+}
+
+function toggleHardwareId() {
+    const isChecked = document.getElementById('hardwareBound').checked;
+    document.getElementById('hardwareIdField').style.display = isChecked ? 'block' : 'none';
+}
+
+function updateFromPlan() {
+    const planSelect = document.getElementById('planSelect');
+    const selectedOption = planSelect.options[planSelect.selectedIndex];
+
+    if (selectedOption.value) {
+        // Get plan data from data attributes
+        const licenseType = selectedOption.dataset.licenseType;
+        const maxSeats = selectedOption.dataset.maxSeats;
+
+        // Update license type
+        document.getElementById('licenseType').value = licenseType;
+
+        // Update max seats
+        document.getElementById('maxSeats').value = maxSeats;
+
+        // Trigger form update for subscription fields
+        updateForm();
+    }
+}
+
+function updateForm() {
+    const type = document.getElementById('licenseType').value;
+    const isSubscription = type === '5';
+
+    // Update description
+    document.getElementById('typeDescription').textContent = typeDescriptions[type];
+
+    // Show/hide subscription fields
+    document.getElementById('gracePeriodField').style.display = isSubscription ? 'block' : 'none';
+    document.getElementById('subscriptionInfo').style.display = isSubscription ? 'block' : 'none';
+
+    // Default expiry for subscription
+    if (isSubscription && document.getElementById('expiryDays').value === '0') {
+        document.getElementById('expiryDays').value = '365';
+    }
+
+    // Initialize hardware ID field visibility
+    toggleHardwareId();
+}
+
+// Initialize on page load
+$(document).ready(function() {
+    // Initialize Select2 for customer dropdown
+    $('#customerSelect').select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Search for a customer...',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Handle Select2 change event
+    $('#customerSelect').on('select2:select', function(e) {
+        fillCustomerInfo(e.params.data.id);
+    });
+
+    $('#customerSelect').on('select2:clear', function(e) {
+        fillCustomerInfo(null);
+    });
+
+    updateForm();
+});
+</script>
+{% endblock %}

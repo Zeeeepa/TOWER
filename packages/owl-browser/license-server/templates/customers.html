@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Customers - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="glow-text mb-1">Customers</h2>
+        <p class="text-muted mb-0">Manage customer accounts</p>
+    </div>
+    <a href="{{ url_for('customer_new') }}" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i>New Customer
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control"
+                       placeholder="Name, email, or company..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="active" {{ 'selected' if status == 'active' }}>Active</option>
+                    <option value="inactive" {{ 'selected' if status == 'inactive' }}>Inactive</option>
+                    <option value="suspended" {{ 'selected' if status == 'suspended' }}>Suspended</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-1"></i>Search
+                </button>
+                {% if search or status %}
+                <a href="{{ url_for('customers_list') }}" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Customers Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Company</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Licenses</th>
+                        <th>Created</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('customer_detail', customer_id=customer.id) }}"
+                               class="text-decoration-none fw-bold">
+                                {{ customer.name }}
+                            </a>
+                        </td>
+                        <td class="text-muted">{{ customer.company or '-' }}</td>
+                        <td>
+                            <a href="mailto:{{ customer.email }}" class="text-muted text-decoration-none">
+                                {{ customer.email }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="status-dot {{ customer.status }}"></span>
+                            {{ customer.status|capitalize }}
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ customer.license_count or 0 }}</span>
+                        </td>
+                        <td class="text-muted small">{{ customer.created_at|datetime }}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                        type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('customer_detail', customer_id=customer.id) }}">
+                                            <i class="bi bi-eye me-2"></i>View Details
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('customer_edit', customer_id=customer.id) }}">
+                                            <i class="bi bi-pencil me-2"></i>Edit
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('invoice_new', customer_id=customer.id) }}">
+                                            <i class="bi bi-receipt me-2"></i>Create Invoice
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-people display-4 d-block mb-3"></i>
+                            No customers found
+                            <br>
+                            <a href="{{ url_for('customer_new') }}" class="btn btn-primary btn-sm mt-3">
+                                Add your first customer
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if total_pages > 1 %}
+    <div class="card-footer bg-transparent">
+        <nav>
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {{ 'disabled' if page == 1 }}">
+                    <a class="page-link" href="?page={{ page - 1 }}&search={{ search }}&status={{ status }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {{ 'active' if p == page }}">
+                    <a class="page-link" href="?page={{ p }}&search={{ search }}&status={{ status }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if page == total_pages }}">
+                    <a class="page-link" href="?page={{ page + 1 }}&search={{ search }}&status={{ status }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

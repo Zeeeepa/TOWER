@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Subscriptions - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="glow-text mb-1">Subscriptions</h2>
+        <p class="text-muted mb-0">Active subscription licenses requiring periodic validation</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>License ID</th>
+                        <th>Licensee</th>
+                        <th>Customer</th>
+                        <th>Plan</th>
+                        <th>Status</th>
+                        <th>Activation</th>
+                        <th>Last Check</th>
+                        <th>Next Check</th>
+                        <th>Grace Period</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in subscriptions %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('license_detail', license_id=sub.license_id) }}"
+                               class="text-decoration-none">
+                                <code class="text-primary">{{ sub.license_id[:12] }}...</code>
+                            </a>
+                        </td>
+                        <td>
+                            <div>{{ sub.name }}</div>
+                            <small class="text-muted">{{ sub.email }}</small>
+                        </td>
+                        <td>
+                            {% if sub.customer_name %}
+                            <a href="{{ url_for('customer_detail', customer_id=sub.customer_id) }}" class="text-decoration-none">
+                                <div>{{ sub.customer_name }}</div>
+                                {% if sub.customer_company %}
+                                <small class="text-muted">{{ sub.customer_company }}</small>
+                                {% endif %}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if sub.plan_name %}
+                            <span class="badge bg-info">{{ sub.plan_name }}</span>
+                            {% if sub.plan_price %}
+                            <br><small class="text-muted">${{ '%.2f'|format(sub.plan_price) }}/mo</small>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if sub.status == 'active' else 'danger' }}">
+                                {{ sub.status|capitalize }}
+                            </span>
+                        </td>
+                        <td class="text-muted small">
+                            {{ sub.activation_date|datetime or 'Not activated' }}
+                        </td>
+                        <td class="text-muted small">
+                            {{ sub.last_check_date|datetime or 'Never' }}
+                        </td>
+                        <td>
+                            {% if sub.next_check_date %}
+                            <span class="{% if sub.next_check_date < now %}text-warning{% endif %}">
+                                {{ sub.next_check_date|datetime }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">Not scheduled</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ sub.grace_period_days }} days</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                        type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{{ url_for('license_detail', license_id=sub.license_id) }}">
+                                            <i class="bi bi-eye me-2"></i>View License
+                                        </a>
+                                    </li>
+                                    {% if sub.status == 'active' %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form action="{{ url_for('subscription_cancel', license_id=sub.license_id) }}"
+                                              method="POST"
+                                              onsubmit="return confirm('Cancel this subscription?');">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-x-circle me-2"></i>Cancel Subscription
+                                            </button>
+                                        </form>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-5">
+                            <i class="bi bi-repeat display-4 d-block mb-3"></i>
+                            No active subscriptions
+                            <br>
+                            <a href="{{ url_for('license_new') }}" class="btn btn-primary btn-sm mt-3">
+                                Create a subscription license
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Info Card -->
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="mb-3">
+            <i class="bi bi-info-circle text-info me-2"></i>About Subscription Licenses
+        </h5>
+        <div class="row">
+            <div class="col-md-4">
+                <h6>Monthly Validation</h6>
+                <p class="text-muted small">
+                    Subscription licenses require monthly server validation.
+                    The check occurs on the same day of the month as activation.
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6>Grace Period</h6>
+                <p class="text-muted small">
+                    If the server is unreachable, the license remains valid
+                    for the grace period (default 7 days).
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6>Cancellation</h6>
+                <p class="text-muted small">
+                    When canceled, the license becomes invalid on the next check.
+                    If reactivated, the browser will detect it on next validation.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

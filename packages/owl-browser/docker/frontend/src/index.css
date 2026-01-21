@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #0A1628;
+  --bg-secondary: #1A2A44;
+  --bg-tertiary: #243448;
+  --primary: #4E9179;
+  --primary-light: #5CA88A;
+  --primary-dark: #3D7862;
+  --text-primary: #E8E8E8;
+  --text-secondary: #A0A0A0;
+  --border: rgba(255, 255, 255, 0.1);
+  --glass: rgba(255, 255, 255, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* Glass card effect */
+@layer components {
+  .glass-card {
+    @apply bg-bg-secondary/80 backdrop-blur-md border border-white/10 rounded-xl;
+  }
+
+  .glass-card-hover {
+    @apply glass-card hover:bg-bg-secondary hover:border-primary/30 transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-light text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-bg-tertiary hover:bg-bg-secondary text-text-primary font-medium px-4 py-2 rounded-lg border border-white/10 transition-all duration-200;
+  }
+
+  .btn-danger {
+    @apply bg-red-600/20 hover:bg-red-600/30 text-red-400 font-medium px-4 py-2 rounded-lg border border-red-500/30 transition-all duration-200;
+  }
+
+  .btn-icon {
+    @apply p-2 rounded-lg bg-bg-tertiary hover:bg-bg-secondary border border-white/10 transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full bg-bg-tertiary border border-white/10 rounded-lg px-3 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all duration-200;
+  }
+
+  .input-field-sm {
+    @apply input-field text-sm py-1.5;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-text-secondary mb-1;
+  }
+
+  .category-header {
+    @apply flex items-center gap-2 px-3 py-2 text-sm font-semibold text-text-secondary uppercase tracking-wide;
+  }
+
+  .tool-item {
+    @apply flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-text-primary hover:bg-bg-tertiary transition-all duration-150;
+  }
+
+  .tool-item-active {
+    @apply tool-item bg-primary/20 text-primary border-l-2 border-primary;
+  }
+
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .status-dot-success {
+    @apply status-dot bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)];
+  }
+
+  .status-dot-warning {
+    @apply status-dot bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)];
+  }
+
+  .status-dot-error {
+    @apply status-dot bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)];
+  }
+
+  .status-dot-neutral {
+    @apply status-dot bg-gray-500;
+  }
+}
+
+/* Picker overlay styles */
+.picker-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: crosshair;
+  z-index: 100;
+}
+
+.picker-crosshair-h {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--primary);
+  box-shadow: 0 0 4px var(--primary);
+  pointer-events: none;
+}
+
+.picker-crosshair-v {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--primary);
+  box-shadow: 0 0 4px var(--primary);
+  pointer-events: none;
+}
+
+.picker-coords {
+  position: absolute;
+  padding: 4px 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--primary);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Animation for loading states */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--primary);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--primary);
+  }
+}
+
+.loading-glow {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+/* Code/JSON result display */
+.code-block {
+  @apply bg-bg-primary rounded-lg p-4 font-mono text-sm overflow-auto;
+  max-height: 300px;
+}
+
+.code-block pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

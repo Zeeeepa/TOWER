@@ -1,0 +1,174 @@
+{% extends "customer/base.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} - Owl Browser Customer Portal{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('customer.billing') }}" class="text-muted text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i>Back to Billing
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-receipt me-2 text-primary"></i>Invoice {{ invoice.invoice_number }}
+                </h4>
+                <span class="badge bg-{{ 'success' if invoice.status == 'paid' else 'warning' if invoice.status == 'pending' else 'secondary' }} fs-6">
+                    {{ invoice.status|capitalize }}
+                </span>
+            </div>
+            <div class="card-body p-4">
+                <!-- Invoice Details -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Invoice Date</h6>
+                        <p class="mb-0">{{ invoice.issue_date|date if invoice.issue_date else invoice.created_at|date if invoice.created_at else 'N/A' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Due Date</h6>
+                        <p class="mb-0">{{ invoice.due_date|date if invoice.due_date else 'N/A' }}</p>
+                    </div>
+                    {% if invoice.paid_at %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Paid Date</h6>
+                        <p class="mb-0 text-success">{{ invoice.paid_at|date }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <hr class="border-secondary">
+
+                <!-- Line Items -->
+                <h6 class="text-muted mb-3">Items</h6>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    {{ item.description }}
+                                    {% if item.period_start and item.period_end %}
+                                    <br><small class="text-muted">{{ item.period_start|date }} - {{ item.period_end|date }}</small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">${{ '%.2f'|format(item.unit_price or 0) }}</td>
+                                <td class="text-end">${{ '%.2f'|format(item.amount or 0) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    No line items
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr class="border-secondary">
+
+                <!-- Totals -->
+                <div class="row justify-content-end">
+                    <div class="col-md-5">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal</span>
+                            <span>${{ '%.2f'|format(invoice.subtotal or 0) }}</span>
+                        </div>
+                        {% if invoice.discount_amount and invoice.discount_amount > 0 %}
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Discount</span>
+                            <span>-${{ '%.2f'|format(invoice.discount_amount) }}</span>
+                        </div>
+                        {% endif %}
+                        {% if invoice.tax_amount and invoice.tax_amount > 0 %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tax ({{ invoice.tax_rate or 0 }}%)</span>
+                            <span>${{ '%.2f'|format(invoice.tax_amount) }}</span>
+                        </div>
+                        {% endif %}
+                        <hr class="border-secondary">
+                        <div class="d-flex justify-content-between fs-5">
+                            <strong>Total</strong>
+                            <strong>${{ '%.2f'|format(invoice.total or 0) }} {{ invoice.currency or 'USD' }}</strong>
+                        </div>
+                        {% if invoice.amount_paid and invoice.amount_paid > 0 %}
+                        <div class="d-flex justify-content-between text-success mt-2">
+                            <span>Amount Paid</span>
+                            <span>-${{ '%.2f'|format(invoice.amount_paid) }}</span>
+                        </div>
+                        {% if invoice.amount_due and invoice.amount_due > 0 %}
+                        <div class="d-flex justify-content-between text-warning mt-2">
+                            <strong>Amount Due</strong>
+                            <strong>${{ '%.2f'|format(invoice.amount_due) }}</strong>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        {% if invoice.notes %}
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-sticky me-2"></i>Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0 text-muted">{{ invoice.notes }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card {{ 'mt-4' if invoice.notes else '' }}">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Invoice Info
+                </h5>
+            </div>
+            <div class="card-body small">
+                <p class="mb-2">
+                    <span class="text-muted">Invoice ID:</span><br>
+                    <code class="small">{{ invoice.id }}</code>
+                </p>
+                {% if invoice.payment_provider %}
+                <p class="mb-2">
+                    <span class="text-muted">Payment Method:</span><br>
+                    {{ invoice.payment_provider|capitalize }}
+                </p>
+                {% endif %}
+                <p class="mb-0">
+                    <span class="text-muted">Created:</span><br>
+                    {{ invoice.created_at|date if invoice.created_at else 'N/A' }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Help -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="mb-3">Need Help?</h6>
+                <p class="text-muted small mb-0">
+                    If you have questions about this invoice, please contact our support team.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

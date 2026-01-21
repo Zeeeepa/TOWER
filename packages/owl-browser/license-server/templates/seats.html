@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Active Seats - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 glow-text">
+        <i class="bi bi-pc-display-horizontal me-2"></i>Active Seats
+    </h2>
+    <div class="d-flex align-items-center gap-3">
+        <span class="badge bg-primary fs-6">{{ seats|length }} active</span>
+        {% if inactive_count|default(0) > 0 %}
+        <form action="{{ url_for('clear_inactive_seats') }}" method="POST" class="d-inline"
+              onsubmit="return confirm('Are you sure you want to delete {{ inactive_count }} inactive seat record(s)? This action cannot be undone.');">
+            <button type="submit" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-trash me-1"></i>Clear {{ inactive_count }} Inactive
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if seats %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>License</th>
+                        <th>Customer</th>
+                        <th>Type</th>
+                        <th>Device</th>
+                        <th>Hardware Fingerprint</th>
+                        <th>First Activated</th>
+                        <th>Last Seen</th>
+                        <th>IP Address</th>
+                        <th>Seats Used</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for seat in seats %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('license_detail', license_id=seat.license_id) }}"
+                               class="text-decoration-none">
+                                {{ seat.name }}
+                            </a>
+                            <br><small class="text-muted">{{ seat.email }}</small>
+                        </td>
+                        <td>
+                            {% if seat.customer_name %}
+                            <a href="{{ url_for('customer_detail', customer_id=seat.customer_id) }}" class="text-decoration-none">
+                                {{ seat.customer_name }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-license-type badge-{{ license_types.get(seat.license_type, 'unknown')|lower }}">
+                                {{ license_types.get(seat.license_type, 'Unknown') }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if seat.device_name %}
+                            <div>{{ seat.device_name }}</div>
+                            {% else %}
+                            <div class="text-muted">Unknown device</div>
+                            {% endif %}
+                            {% if seat.os_info %}
+                            <small class="text-muted">{{ seat.os_info }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <code class="text-muted" title="{{ seat.hardware_fingerprint }}">
+                                {{ seat.hardware_fingerprint[:24] }}...
+                            </code>
+                        </td>
+                        <td class="text-muted">{{ seat.first_activated_at|datetime }}</td>
+                        <td class="text-muted">{{ seat.last_seen_at|datetime }}</td>
+                        <td class="text-muted">{{ seat.ip_address or 'N/A' }}</td>
+                        <td>
+                            <span class="badge bg-info">
+                                {% set seat_num = namespace(count=0) %}
+                                {% for s in seats if s.license_id == seat.license_id and s.is_active %}
+                                    {% set seat_num.count = seat_num.count + 1 %}
+                                {% endfor %}
+                                {{ seat_num.count }} / {{ seat.max_seats }}
+                            </span>
+                        </td>
+                        <td>
+                            <form action="{{ url_for('deactivate_seat', license_id=seat.license_id, hardware_fingerprint=seat.hardware_fingerprint) }}"
+                                  method="POST" class="d-inline"
+                                  onsubmit="return confirm('Are you sure you want to deactivate this seat?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-x-circle"></i> Deactivate
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-pc-display-horizontal display-1 mb-3"></i>
+            <p class="mb-0">No active seats</p>
+            <p class="small">Seats are created when licenses are activated on devices</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,535 @@
+{% extends "base.html" %}
+
+{% block title %}New Invoice - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('customers_list') }}">Customers</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('customer_detail', customer_id=customer.id) }}">{{ customer.name }}</a></li>
+            <li class="breadcrumb-item active">New Invoice</li>
+        </ol>
+    </nav>
+    <h2 class="glow-text mb-1">Create Invoice</h2>
+    <p class="text-muted mb-0">Create a new invoice for {{ customer.name }}</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="POST" id="invoiceForm">
+            <!-- License Selection Card -->
+            {% if licenses %}
+            <div class="card mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-key me-2"></i>Customer Licenses</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">Select licenses to add to this invoice:</p>
+                    <div class="row">
+                        {% for license in licenses %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-dark license-card" data-license-id="{{ license.id }}"
+                                 data-license-name="{{ license.name }}"
+                                 data-license-email="{{ license.email }}"
+                                 data-license-type="{{ license.license_type }}"
+                                 data-plan-id="{{ license.plan_id or '' }}"
+                                 data-plan-name="{{ license.plan_name or '' }}"
+                                 data-price-monthly="{{ license.price_monthly or 0 }}"
+                                 data-price-yearly="{{ license.price_yearly or 0 }}">
+                                <div class="card-body p-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input license-checkbox"
+                                               id="license_{{ license.id }}" value="{{ license.id }}">
+                                        <label class="form-check-label w-100" for="license_{{ license.id }}">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <strong>{{ license.name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ license.email }}</small>
+                                                </div>
+                                                <span class="badge badge-license-type badge-{{ license_types.get(license.license_type, 'trial')|lower }}">
+                                                    {{ license_types.get(license.license_type, 'Unknown') }}
+                                                </span>
+                                            </div>
+                                            <div class="mt-2 small">
+                                                <span class="text-muted">ID:</span>
+                                                <code class="small">{{ license.id[:8] }}...</code>
+                                                {% if license.expiry_date %}
+                                                <span class="ms-2 text-muted">Expires:</span> {{ license.expiry_date|datetime if license.expiry_date is string else license.expiry_date.strftime('%Y-%m-%d') }}
+                                                {% endif %}
+                                            </div>
+                                            {% if license.plan_name %}
+                                            <div class="mt-2 small">
+                                                <span class="text-muted">Plan:</span> {{ license.plan_name }}
+                                                <span class="ms-2 text-success fw-bold">${{ '%.2f'|format(license.price_monthly) }}/mo</span>
+                                            </div>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="addSelectedLicenses">
+                        <i class="bi bi-plus-lg me-1"></i>Add Selected Licenses to Invoice
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Invoice Items Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Invoice Items</h5>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="addCustomItemBtn">
+                        <i class="bi bi-plus-lg me-1"></i>Add Custom Item
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="itemsContainer">
+                        <!-- Items will be added here dynamically -->
+                    </div>
+                    <div id="noItemsMessage" class="text-center text-muted py-4">
+                        <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                        <p class="mb-0">No items added yet.</p>
+                        <small>Select licenses above or add custom items.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discount Code Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-tag me-2"></i>Discount</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Discount Code</label>
+                            <div class="input-group">
+                                <input type="text" name="discount_code" class="form-control" id="discountCode"
+                                       placeholder="Enter code" list="discountCodesList">
+                                <button type="button" class="btn btn-outline-primary" id="applyDiscountBtn">Apply</button>
+                            </div>
+                            <datalist id="discountCodesList">
+                                {% for code in discount_codes %}
+                                <option value="{{ code.code }}" data-type="{{ code.discount_type }}" data-value="{{ code.discount_value }}">
+                                    {{ code.code }} - {{ code.discount_value }}{% if code.discount_type == 'percentage' %}%{% else %} {{ code.currency or 'USD' }}{% endif %} off
+                                </option>
+                                {% endfor %}
+                            </datalist>
+                            <div id="discountCodeStatus" class="form-text"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Or Manual Discount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="discount_amount" class="form-control" id="discountAmount"
+                                       value="0" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="form-text">Enter a fixed discount amount</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Totals Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Totals</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Tax Rate (%)</label>
+                            <input type="number" name="tax_rate" class="form-control" id="taxRate"
+                                   value="0" min="0" max="100" step="0.01">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Currency</label>
+                            <select name="currency" class="form-select" id="currencySelect">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Due Date</label>
+                            <input type="date" name="due_date" class="form-control" id="dueDate">
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6 offset-md-6">
+                            <table class="table table-borderless mb-0">
+                                <tr>
+                                    <td class="text-end">Subtotal:</td>
+                                    <td class="text-end fw-bold" id="subtotalDisplay">$0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-end">Tax:</td>
+                                    <td class="text-end" id="taxDisplay">$0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-end text-success">Discount:</td>
+                                    <td class="text-end text-success" id="discountDisplay">-$0.00</td>
+                                </tr>
+                                <tr class="table-active">
+                                    <td class="text-end"><strong class="fs-5">Total:</strong></td>
+                                    <td class="text-end"><strong class="fs-5" id="totalDisplay">$0.00</strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Notes</h5>
+                </div>
+                <div class="card-body">
+                    <textarea name="notes" class="form-control" rows="2"
+                              placeholder="Additional notes for the invoice">{{ form_data.get('notes', '') }}</textarea>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                    <i class="bi bi-check-lg me-1"></i>Create Invoice
+                </button>
+                <a href="{{ url_for('customer_detail', customer_id=customer.id) }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Customer Info -->
+        <div class="card mb-4">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0"><i class="bi bi-person me-2"></i>Customer</h6>
+            </div>
+            <div class="card-body">
+                <h6>{{ customer.name }}</h6>
+                {% if customer.company %}<p class="text-muted mb-1">{{ customer.company }}</p>{% endif %}
+                <p class="mb-0 small">{{ customer.email }}</p>
+                {% if customer.address_line1 %}
+                <hr>
+                <p class="mb-0 small text-muted">
+                    {{ customer.address_line1 }}<br>
+                    {% if customer.address_line2 %}{{ customer.address_line2 }}<br>{% endif %}
+                    {{ customer.city }}{% if customer.state %}, {{ customer.state }}{% endif %} {{ customer.postal_code }}<br>
+                    {{ customer.country }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Billing Plans Reference -->
+        {% if billing_plans %}
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0"><i class="bi bi-card-list me-2"></i>Billing Plans</h6>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for plan in billing_plans %}
+                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center plan-item"
+                        data-plan-id="{{ plan.id }}"
+                        data-plan-name="{{ plan.display_name or plan.name }}"
+                        data-price-monthly="{{ plan.price_monthly }}"
+                        data-price-yearly="{{ plan.price_yearly }}"
+                        style="cursor: pointer;">
+                        <div>
+                            <strong>{{ plan.display_name or plan.name }}</strong>
+                            <br>
+                            <small class="text-muted">
+                                ${{ '%.2f'|format(plan.price_monthly) }}/mo · ${{ '%.2f'|format(plan.price_yearly) }}/yr
+                            </small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary add-plan-btn">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.license-card {
+    border: 1px solid rgba(78, 145, 121, 0.2);
+    transition: all 0.2s ease;
+}
+.license-card:hover {
+    border-color: rgba(78, 145, 121, 0.5);
+}
+.license-card.selected {
+    border-color: var(--owl-primary);
+    background: rgba(78, 145, 121, 0.1) !important;
+}
+.plan-item:hover {
+    background: rgba(78, 145, 121, 0.1) !important;
+}
+.item-row {
+    background: rgba(78, 145, 121, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+.item-row .item-type-badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('itemsContainer');
+    const noItemsMsg = document.getElementById('noItemsMessage');
+    const submitBtn = document.getElementById('submitBtn');
+    let itemCount = 0;
+
+    // Available discount codes data
+    const discountCodes = {
+        {% for code in discount_codes %}
+        '{{ code.code }}': {
+            type: '{{ code.discount_type }}',
+            value: {{ code.discount_value }},
+            maxUses: {{ code.max_uses or 'null' }},
+            timesUsed: {{ code.times_used or 0 }}
+        },
+        {% endfor %}
+    };
+
+    // Toggle license card selection
+    document.querySelectorAll('.license-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const card = this.closest('.license-card');
+            card.classList.toggle('selected', this.checked);
+        });
+    });
+
+    // Add selected licenses to invoice
+    document.getElementById('addSelectedLicenses')?.addEventListener('click', function() {
+        document.querySelectorAll('.license-checkbox:checked').forEach(checkbox => {
+            const card = checkbox.closest('.license-card');
+            const licenseId = card.dataset.licenseId;
+            const licenseName = card.dataset.licenseName;
+            const licenseEmail = card.dataset.licenseEmail;
+            const licenseType = card.dataset.licenseType;
+            const planId = card.dataset.planId;
+            const planName = card.dataset.planName;
+            const priceMonthly = parseFloat(card.dataset.priceMonthly) || 0;
+
+            // Check if already added
+            if (document.querySelector(`input[name="item_license_id[]"][value="${licenseId}"]`)) {
+                return;
+            }
+
+            // Build description with plan name if available
+            let description = `License: ${licenseName}`;
+            if (planName) {
+                description += ` (${planName})`;
+            }
+
+            addItemRow({
+                description: description,
+                quantity: 1,
+                price: priceMonthly > 0 ? priceMonthly : '',
+                licenseId: licenseId,
+                planId: planId,
+                type: 'license'
+            });
+
+            // Uncheck and deselect
+            checkbox.checked = false;
+            card.classList.remove('selected');
+        });
+    });
+
+    // Add plan from sidebar
+    document.querySelectorAll('.add-plan-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const item = this.closest('.plan-item');
+            const planId = item.dataset.planId;
+            const planName = item.dataset.planName;
+            const priceMonthly = item.dataset.priceMonthly;
+
+            addItemRow({
+                description: `${planName} - Monthly Subscription`,
+                quantity: 1,
+                price: priceMonthly,
+                licenseId: '',
+                planId: planId,
+                type: 'plan'
+            });
+        });
+    });
+
+    // Add custom item button
+    document.getElementById('addCustomItemBtn').addEventListener('click', function() {
+        addItemRow({
+            description: '',
+            quantity: 1,
+            price: '',
+            licenseId: '',
+            planId: '',
+            type: 'custom'
+        });
+    });
+
+    function addItemRow(data) {
+        itemCount++;
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="item-type-badge badge ${data.type === 'license' ? 'bg-primary' : data.type === 'plan' ? 'bg-success' : 'bg-secondary'}">
+                    ${data.type === 'license' ? 'License' : data.type === 'plan' ? 'Plan' : 'Custom'}
+                </span>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-item">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <input type="text" name="item_description[]" class="form-control form-control-sm"
+                           placeholder="Description" value="${data.description}" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="item_quantity[]" class="form-control form-control-sm item-qty"
+                           placeholder="Qty" value="${data.quantity}" min="1" required>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" name="item_price[]" class="form-control item-price"
+                               placeholder="Price" step="0.01" min="0" value="${data.price}" required>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="item_license_id[]" value="${data.licenseId}">
+            <input type="hidden" name="item_plan_id[]" value="${data.planId}">
+        `;
+        container.appendChild(row);
+        updateUI();
+        calculateTotal();
+    }
+
+    // Remove item row
+    container.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-item')) {
+            e.target.closest('.item-row').remove();
+            itemCount--;
+            updateUI();
+            calculateTotal();
+        }
+    });
+
+    // Calculate totals on input change
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('item-qty') ||
+            e.target.classList.contains('item-price') ||
+            e.target.id === 'taxRate' ||
+            e.target.id === 'discountAmount') {
+            calculateTotal();
+        }
+    });
+
+    // Apply discount code
+    document.getElementById('applyDiscountBtn').addEventListener('click', function() {
+        const code = document.getElementById('discountCode').value.trim().toUpperCase();
+        const statusEl = document.getElementById('discountCodeStatus');
+        const discountInput = document.getElementById('discountAmount');
+
+        if (!code) {
+            statusEl.textContent = '';
+            return;
+        }
+
+        if (discountCodes[code]) {
+            const discount = discountCodes[code];
+            if (discount.maxUses && discount.timesUsed >= discount.maxUses) {
+                statusEl.innerHTML = '<span class="text-danger">Code has reached maximum uses</span>';
+                return;
+            }
+
+            // Calculate discount based on current subtotal
+            const subtotal = calculateSubtotal();
+            let discountAmount = 0;
+            if (discount.type === 'percentage') {
+                discountAmount = subtotal * (discount.value / 100);
+                statusEl.innerHTML = `<span class="text-success">✓ ${discount.value}% discount applied</span>`;
+            } else {
+                discountAmount = discount.value;
+                statusEl.innerHTML = `<span class="text-success">✓ $${discount.value.toFixed(2)} discount applied</span>`;
+            }
+
+            discountInput.value = discountAmount.toFixed(2);
+            discountInput.readOnly = true;
+            calculateTotal();
+        } else {
+            statusEl.innerHTML = '<span class="text-danger">Invalid discount code</span>';
+        }
+    });
+
+    // Clear discount code effect when changed
+    document.getElementById('discountCode').addEventListener('input', function() {
+        document.getElementById('discountAmount').readOnly = false;
+        document.getElementById('discountCodeStatus').textContent = '';
+    });
+
+    function calculateSubtotal() {
+        let subtotal = 0;
+        container.querySelectorAll('.item-row').forEach(row => {
+            const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.item-price').value) || 0;
+            subtotal += qty * price;
+        });
+        return subtotal;
+    }
+
+    function calculateTotal() {
+        const subtotal = calculateSubtotal();
+        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+        const discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+
+        const tax = subtotal * (taxRate / 100);
+        const total = subtotal + tax - discount;
+
+        const currency = document.getElementById('currencySelect').value;
+        const symbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
+
+        document.getElementById('subtotalDisplay').textContent = symbol + subtotal.toFixed(2);
+        document.getElementById('taxDisplay').textContent = symbol + tax.toFixed(2);
+        document.getElementById('discountDisplay').textContent = '-' + symbol + discount.toFixed(2);
+        document.getElementById('totalDisplay').textContent = symbol + total.toFixed(2);
+    }
+
+    function updateUI() {
+        const hasItems = container.querySelectorAll('.item-row').length > 0;
+        noItemsMsg.style.display = hasItems ? 'none' : 'block';
+        submitBtn.disabled = !hasItems;
+    }
+
+    // Currency change
+    document.getElementById('currencySelect').addEventListener('change', calculateTotal);
+
+    // Initial state
+    updateUI();
+    calculateTotal();
+});
+</script>
+{% endblock %}

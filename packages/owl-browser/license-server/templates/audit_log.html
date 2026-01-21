@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Log - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="glow-text mb-1">Audit Log</h2>
+    <p class="text-muted mb-0">Track all administrative actions</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Target Type</th>
+                        <th>Target ID</th>
+                        <th>Details</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td class="text-muted small">{{ log.created_at|datetime }}</td>
+                        <td>
+                            <i class="bi bi-person-circle me-1"></i>
+                            {{ log.admin_user }}
+                        </td>
+                        <td>
+                            {% if log.action == 'login' %}
+                            <span class="badge bg-success">{{ log.action }}</span>
+                            {% elif log.action == 'logout' %}
+                            <span class="badge bg-secondary">{{ log.action }}</span>
+                            {% elif log.action == 'failed_login' %}
+                            <span class="badge bg-danger">{{ log.action }}</span>
+                            {% elif 'revoke' in log.action or 'cancel' in log.action %}
+                            <span class="badge bg-warning">{{ log.action }}</span>
+                            {% elif 'create' in log.action %}
+                            <span class="badge bg-primary">{{ log.action }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ log.action }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ log.target_type or '-' }}</td>
+                        <td>
+                            {% if log.target_id %}
+                            <code class="small">{{ log.target_id[:16] }}...</code>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                            {{ log.details or '-' }}
+                        </td>
+                        <td class="text-muted small">{{ log.ip_address or '-' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-journal-text display-4 d-block mb-3"></i>
+                            No audit logs yet
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

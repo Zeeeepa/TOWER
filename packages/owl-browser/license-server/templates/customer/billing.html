@@ -1,0 +1,78 @@
+{% extends "customer/base.html" %}
+
+{% block title %}Billing - Owl Browser Customer Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="glow-text mb-1">Billing</h2>
+        <p class="text-muted mb-0">View your invoices and billing history</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-transparent border-bottom border-secondary">
+        <h5 class="mb-0">
+            <i class="bi bi-receipt me-2 text-primary"></i>Invoices
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('customer.invoice_detail', invoice_id=invoice.id) }}"
+                               class="text-decoration-none">
+                                <code class="text-primary">{{ invoice.invoice_number }}</code>
+                            </a>
+                        </td>
+                        <td class="text-muted">{{ invoice.created_at|date if invoice.created_at else 'N/A' }}</td>
+                        <td>
+                            {% if invoice.plan_name %}
+                            {{ invoice.plan_name }}
+                            {% else %}
+                            License Payment
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>${{ '%.2f'|format(invoice.total or 0) }}</strong>
+                            <small class="text-muted">{{ invoice.currency or 'USD' }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if invoice.status == 'paid' else 'warning' if invoice.status == 'pending' else 'secondary' }}">
+                                {{ invoice.status|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('customer.invoice_detail', invoice_id=invoice.id) }}"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-receipt display-4 d-block mb-3"></i>
+                            No invoices found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

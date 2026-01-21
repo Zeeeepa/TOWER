@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="css/creep-style.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>Owl Lie Detector - CreepJS Debug</title>
+</head>
+<body>
+  <!-- Debug Panel at top -->
+  <div id="owl-debug-panel">
+    <div class="debug-header">
+      <h1>Owl Browser Lie Detector</h1>
+      <p>Running CreepJS detection with full debug output</p>
+    </div>
+    <div class="debug-controls">
+      <button id="showLiesBtn" class="btn btn-primary">Show Lies Only</button>
+      <button id="showFullBtn" class="btn btn-secondary">Show Full Report</button>
+      <button id="exportBtn" class="btn btn-secondary">Export JSON</button>
+      <button id="copyResultsBtn" class="btn btn-secondary">Copy Debug JSON</button>
+      <button id="runPhantomTest" class="btn btn-primary">Run Phantom Test</button>
+    </div>
+    <div id="lie-summary">
+      <div class="summary-box">
+        <span class="label">Total Lies:</span>
+        <span id="lieCount" class="value">Loading...</span>
+      </div>
+      <div class="summary-box">
+        <span class="label">Lie Types:</span>
+        <span id="lieTypes" class="value">-</span>
+      </div>
+    </div>
+    <div id="lies-detail"></div>
+
+    <!-- Phantom Darkness Debug Section -->
+    <div id="phantom-section" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+      <h3 style="color: #ff4f4f; margin: 0 0 10px 0;">PHANTOM DARKNESS Test (Same as CreepJS)</h3>
+      <p style="color: #888; font-size: 12px;">This replicates CreepJS's doubly-nested iframe detection</p>
+      <pre id="phantom-output" style="color: #888; font-size: 12px; overflow-x: auto; white-space: pre-wrap; max-height: 400px; overflow-y: auto;"></pre>
+    </div>
+
+    <!-- VM Profile Debug Section -->
+    <div id="vm-profile-section" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+      <h3 style="color: #4f9eff; margin: 0 0 10px 0;">VM Profile Debug</h3>
+      <pre id="vm-profile-output" style="color: #888; font-size: 12px; overflow-x: auto; white-space: pre-wrap;"></pre>
+    </div>
+
+    <!-- Worker Debug Section -->
+    <div id="worker-section" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+      <h3 style="color: #4f9eff; margin: 0 0 10px 0;">Worker Context Debug</h3>
+      <pre id="worker-output" style="color: #888; font-size: 12px; overflow-x: auto; white-space: pre-wrap;"></pre>
+    </div>
+  </div>
+
+  <!-- Original CreepJS UI -->
+  <div id="fp-app">
+    <fingerprint>
+      <div id="fingerprint-data">
+        <div class="fingerprint-header-container">
+          <div class="fingerprint-header">
+            <div class="ellipsis-all">FP ID: Computing...</div>
+            <div id="fuzzy-fingerprint">
+              <div class="ellipsis-all fuzzy-fp">Fuzzy: <span class="blurred">0000000000000000000000000000000000000000000000000000000000000000</span></div>
+            </div>
+            <div><span class="time">0 ms</span></div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <strong>WebRTC</strong>
+            <div>host connection:</div>
+            <div class="block-text"></div>
+            <div>foundation/ip:</div>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-six">
+            <div>sdp capabilities:</div>
+            <div>stun connection:</div>
+            <div class="block-text"></div>
+            <div>devices (0):</div>
+            <div class="block-text"></div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <strong>Timezone</strong>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-six">
+            <strong>Intl</strong>
+            <div class="block-text"></div>
+          </div>
+        </div>
+        <div id="headless-resistance-detection" class="flex-grid hidden">
+          <div class="col-six">
+            <strong>Headless</strong>
+            <div>chromium:</div>
+            <div>0% like headless:</div>
+            <div>0% headless:</div>
+            <div>0% stealth:</div>
+            <div>platform hints:</div>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-six">
+            <strong>Resistance</strong>
+            <div>privacy:</div>
+            <div>security:</div>
+            <div>mode:</div>
+            <div>extension:</div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <strong>Worker</strong>
+            <div>lang/timezone:</div>
+            <div class="block-text"></div>
+            <div>gpu:</div>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-six">
+            <div>userAgent:</div>
+            <div class="block-text"></div>
+            <div>device:</div>
+            <div class="block-text"></div>
+            <div>userAgentData:</div>
+            <div class="block-text"></div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <strong>WebGL</strong>
+            <div>images:</div>
+            <div>pixels:</div>
+            <div>params (0):</div>
+            <div>exts (0):</div>
+            <div>gpu:</div>
+            <div class="block-text"></div>
+            <image class="gl-image" />
+          </div>
+          <div class="col-six">
+            <strong>Screen</strong>
+            <div>...screen:</div>
+            <div>....avail:</div>
+            <div>touch:</div>
+            <div>depth:</div>
+            <div>viewport:</div>
+            <div class="screen-container"></div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <strong>Canvas 2d</strong>
+            <div>data:</div>
+            <div>rendering:</div>
+            <div class="icon-pixel-container pixels"></div>
+            <div class="icon-pixel-container pixels"></div>
+            <div>textMetrics:</div>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-six">
+            <strong>Fonts</strong>
+            <div>load (0):</div>
+            <div>apps:</div>
+            <div class="block-text-large"></div>
+            <div class="block-text"></div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <strong>DOMRect</strong>
+            <div>elems A:</div>
+            <div>elems B:</div>
+            <div>range A:</div>
+            <div>range B:</div>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-six">
+            <strong>SVGRect</strong>
+            <div>bBox:</div>
+            <div>char:</div>
+            <div>subs:</div>
+            <div>text:</div>
+            <div class="block-text"></div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-four">
+            <strong>Audio</strong>
+            <div>sum:</div>
+            <div>gain:</div>
+            <div>freq:</div>
+            <div>time:</div>
+            <div>trap:</div>
+            <div>unique:</div>
+            <div>data:</div>
+            <div>copy:</div>
+            <div>values:</div>
+          </div>
+          <div class="col-four">
+            <strong>Speech</strong>
+            <div>local (0):</div>
+            <div>remote (0):</div>
+            <div>lang (0):</div>
+            <div>default:</div>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-four">
+            <strong>Media</strong>
+            <div>mimes (0):</div>
+            <div>devices (0):</div>
+            <div class="block-text"></div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <div>Features:</div>
+            <div>JS/DOM:</div>
+          </div>
+          <div class="col-six">
+            <div>CSS:</div>
+            <div>Window:</div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <strong>CSS Media Queries</strong>
+            <div>@media:</div>
+            <div>matchMedia:</div>
+            <div>touch device:</div>
+            <div>screen query:</div>
+          </div>
+          <div class="col-six">
+            <strong>Computed Style</strong>
+            <div>keys (0):</div>
+            <div>system styles:</div>
+            <div>
+              <div>system</div>
+            </div>
+            <div class="gradient"></div>
+          </div>
+        </div>
+        <div class="hidden">
+          <div class="flex-grid">
+            <div class="col-six">
+              <strong>Math</strong>
+              <div>results:</div>
+              <div>
+                <div>0% of engine</div>
+              </div>
+            </div>
+            <div class="col-six">
+              <strong>Error</strong>
+              <div>results:</div>
+              <div>
+                <div>0% of engine</div>
+              </div>
+            </div>
+          </div>
+          <div class="flex-grid">
+            <div class="col-six">
+              <strong>Window</strong>
+              <div>keys (0):</div>
+              <div>
+                <div>0% of version</div>
+              </div>
+            </div>
+            <div class="col-six">
+              <strong>HTMLElement</strong>
+              <div>keys (0):</div>
+              <div>
+                <div>0% engine</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-six">
+            <strong>Navigator</strong>
+            <div>properties (0):</div>
+            <div>dnt:</div>
+            <div>gpc:</div>
+            <div>lang:</div>
+            <div>mimeTypes (0):</div>
+            <div>permissions (0):</div>
+            <div>plugins (0):</div>
+            <div>vendor:</div>
+            <div>webgpu:</div>
+            <div>userAgentData:</div>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-six">
+            <div>device:</div>
+            <div class="block-text"></div>
+            <div>ua parsed:</div>
+            <div>userAgent:</div>
+            <div class="block-text"></div>
+            <div>appVersion:</div>
+            <div class="block-text"></div>
+          </div>
+        </div>
+        <div class="flex-grid hidden">
+          <div class="col-four">
+            <strong>Status</strong>
+            <div>network:</div>
+            <div class="block-text"></div>
+          </div>
+          <div class="col-four">
+            <div>battery:</div>
+            <div class="block-text-large"></div>
+          </div>
+          <div class="col-four">
+            <div>available:</div>
+            <div class="block-text-large"></div>
+          </div>
+        </div>
+      </div>
+    </fingerprint>
+  </div>
+
+  <!-- Load CreepJS -->
+  <script src="creep.js" defer></script>
+
+  <!-- Our debug script that hooks into CreepJS results -->
+  <script>
+    // ============================================================
+    // OWL LIE DETECTOR DEBUG OUTPUT
+    // Exports results to window.OWL_DEBUG for MCP extraction
+    // ============================================================
+
+    window.OWL_DEBUG = {
+      ready: false,
+      lies: null,
+      vmProfile: null,
+      workerData: null,
+      fingerprint: null,
+      timestamp: null,
+      phantomTest: null
+    };
+
+    // ============================================================
+    // PHANTOM DARKNESS TEST
+    // This replicates EXACTLY what CreepJS does:
+    // 1. Create an iframe
+    // 2. Inside that iframe, create ANOTHER iframe
+    // 3. Run tests in that doubly-nested context
+    // ============================================================
+
+    const GHOST_STYLE = `
+      height: 100vh;
+      width: 100vw;
+      position: absolute;
+      left:-10000px;
+      visibility: hidden;
+    `;
+
+    function getRandomId() {
+      return String.fromCharCode(Math.random() * 26 + 97) + Math.random().toString(36).slice(-7);
+    }
+
+    // Known valid toString patterns (from CreepJS)
+    function hasKnownToString(name) {
+      return {
+        [`function ${name}() { [native code] }`]: true,
+        [`function get ${name}() { [native code] }`]: true,
+        [`function () { [native code] }`]: true,
+        [`function ${name}() {\n    [native code]\n}`]: true,
+        [`function get ${name}() {\n    [native code]\n}`]: true,
+        [`function () {\n    [native code]\n}`]: true,
+      };
+    }
+
+    // Check if TypeError
+    function isTypeError(err) {
+      return err.constructor.name === 'TypeError';
+    }
+
+    // Test if function fails with TypeError
+    function failsTypeError({ spawnErr, withStack, final }) {
+      try {
+        spawnErr();
+        throw Error();
+      } catch (err) {
+        if (!isTypeError(err)) return true;
+        return withStack ? withStack(err) : false;
+      } finally {
+        final && final();
+      }
+    }
+
+    // queryLies - exact replica of CreepJS's lie detection
+    function queryLies({ scope, apiFunction, proto, obj, lieProps }) {
+      if (typeof apiFunction !== 'function') {
+        return { lied: 0, lieTypes: [] };
+      }
+
+      const name = apiFunction.name.replace(/get\s/, '');
+      const objName = obj?.name;
+      const nativeProto = Object.getPrototypeOf(apiFunction);
+      const HAS_REFLECT = 'Reflect' in scope;
+
+      const lies = {
+        ['failed illegal error']: !!obj && failsTypeError({
+          spawnErr: () => obj.prototype[name],
+        }),
+        ['failed undefined properties']: (
+          !!obj && /^(screen|navigator)$/i.test(objName) && !!(
+            Object.getOwnPropertyDescriptor(scope[objName.toLowerCase()], name) || (
+              HAS_REFLECT &&
+              Reflect.getOwnPropertyDescriptor(scope[objName.toLowerCase()], name)
+            )
+          )
+        ),
+        ['failed call interface error']: failsTypeError({
+          spawnErr: () => {
+            new apiFunction(); apiFunction.call(proto);
+          },
+        }),
+        ['failed apply interface error']: failsTypeError({
+          spawnErr: () => {
+            new apiFunction(); apiFunction.apply(proto);
+          },
+        }),
+        ['failed new instance error']: failsTypeError({
+          spawnErr: () => new apiFunction(),
+        }),
+        ['failed class extends error']: failsTypeError({
+          spawnErr: () => {
+            class Fake extends apiFunction { }
+          },
+        }),
+        ['failed null conversion error']: failsTypeError({
+          spawnErr: () => Object.setPrototypeOf(apiFunction, null).toString(),
+          final: () => Object.setPrototypeOf(apiFunction, nativeProto),
+        }),
+        ['failed toString']: (
+          !hasKnownToString(name)[scope.Function.prototype.toString.call(apiFunction)] ||
+          !hasKnownToString('toString')[scope.Function.prototype.toString.call(apiFunction.toString)]
+        ),
+        ['failed "prototype" in function']: 'prototype' in apiFunction,
+        ['failed descriptor']: !!(
+          Object.getOwnPropertyDescriptor(apiFunction, 'arguments') ||
+          Reflect.getOwnPropertyDescriptor(apiFunction, 'arguments') ||
+          Object.getOwnPropertyDescriptor(apiFunction, 'caller') ||
+          Reflect.getOwnPropertyDescriptor(apiFunction, 'caller') ||
+          Object.getOwnPropertyDescriptor(apiFunction, 'prototype') ||
+          Reflect.getOwnPropertyDescriptor(apiFunction, 'prototype') ||
+          Object.getOwnPropertyDescriptor(apiFunction, 'toString') ||
+          Reflect.getOwnPropertyDescriptor(apiFunction, 'toString')
+        ),
+        ['failed own property']: !!(
+          apiFunction.hasOwnProperty('arguments') ||
+          apiFunction.hasOwnProperty('caller') ||
+          apiFunction.hasOwnProperty('prototype') ||
+          apiFunction.hasOwnProperty('toString')
+        ),
+        ['failed descriptor keys']: (
+          Object.keys(Object.getOwnPropertyDescriptors(apiFunction)).sort().toString() !== 'length,name'
+        ),
+        ['failed own property names']: (
+          Object.getOwnPropertyNames(apiFunction).sort().toString() !== 'length,name'
+        ),
+        ['failed own keys names']: HAS_REFLECT && (
+          Reflect.ownKeys(apiFunction).sort().toString() !== 'length,name'
+        ),
+        // Proxy Detection
+        ['failed object toString error']: (
+          failsTypeError({
+            spawnErr: () => Object.create(apiFunction).toString(),
+            withStack: (err) => !/at Function\.toString /.test(err.stack?.split('\n')[1] || ''),
+          }) ||
+          failsTypeError({
+            spawnErr: () => Object.create(new Proxy(apiFunction, {})).toString(),
+            withStack: (err) => !/at Object\.toString/.test(err.stack?.split('\n')[1] || ''),
+          })
+        ),
+        ['failed at incompatible proxy error']: failsTypeError({
+          spawnErr: () => {
+            apiFunction.arguments; apiFunction.caller;
+          },
+        }),
+        ['failed at toString incompatible proxy error']: failsTypeError({
+          spawnErr: () => {
+            apiFunction.toString.arguments; apiFunction.toString.caller;
+          },
+        }),
+        ['failed at too much recursion error']: failsTypeError({
+          spawnErr: () => {
+            Object.setPrototypeOf(apiFunction, Object.create(apiFunction)).toString();
+          },
+          final: () => Object.setPrototypeOf(apiFunction, nativeProto),
+        }),
+      };
+
+      const lieTypes = Object.keys(lies).filter((key) => !!lies[key]);
+      return { lied: lieTypes.length, lieTypes, allTests: lies };
+    }
+
+    // Test a single getter/function with full diagnostic output
+    function testProperty(scope, objConstructor, propName, isGetter) {
+      const result = {
+        property: propName,
+        isGetter,
+        error: null,
+        lies: [],
+        allTests: {},
+        apiFunction: null,
+        toString: null,
+        ownKeys: null,
+        hasPrototype: null
+      };
+
+      try {
+        const proto = objConstructor.prototype || objConstructor;
+        let apiFunction;
+
+        if (isGetter) {
+          const desc = Object.getOwnPropertyDescriptor(proto, propName);
+          if (!desc || !desc.get) {
+            result.error = 'No getter found';
+            return result;
+          }
+          apiFunction = desc.get;
+        } else {
+          apiFunction = proto[propName];
+          if (typeof apiFunction !== 'function') {
+            result.error = 'Not a function';
+            return result;
+          }
+        }
+
+        result.apiFunction = typeof apiFunction;
+        result.toString = scope.Function.prototype.toString.call(apiFunction);
+        // Convert symbols to strings before sorting to avoid "Cannot convert Symbol to string"
+        const keys = Reflect.ownKeys(apiFunction).map(k => typeof k === 'symbol' ? k.toString() : k);
+        result.ownKeys = keys.sort().join(',');
+        result.hasPrototype = 'prototype' in apiFunction;
+
+        const queryResult = queryLies({
+          scope,
+          apiFunction,
+          proto,
+          obj: isGetter ? objConstructor : null,
+          lieProps: {}
+        });
+
+        result.lies = queryResult.lieTypes;
+        result.allTests = queryResult.allTests;
+      } catch (e) {
+        result.error = e.message;
+        result.errorStack = e.stack;
+      }
+
+      return result;
+    }
+
+    // Create the "Phantom Darkness" - doubly nested iframe
+    function createPhantomDarkness() {
+      return new Promise((resolve) => {
+        try {
+          // Create first iframe
+          const div = document.createElement('div');
+          div.setAttribute('id', getRandomId());
+          div.setAttribute('style', GHOST_STYLE);
+          div.innerHTML = `<div><iframe></iframe></div>`;
+          document.body.appendChild(div);
+
+          const iframe1 = div.querySelector('iframe');
+          if (!iframe1 || !iframe1.contentWindow) {
+            resolve({ error: 'First iframe failed', window: window });
+            return;
+          }
+
+          // Wait for first iframe to load
+          iframe1.onload = () => {
+            try {
+              // Create second iframe inside first
+              const div2 = iframe1.contentWindow.document.createElement('div');
+              div2.innerHTML = `<div><iframe></iframe></div>`;
+              iframe1.contentWindow.document.body.appendChild(div2);
+
+              const iframe2 = div2.querySelector('iframe');
+              if (!iframe2 || !iframe2.contentWindow) {
+                resolve({ error: 'Second iframe failed', window: iframe1.contentWindow });
+                return;
+              }
+
+              // Wait for second iframe
+              iframe2.onload = () => {
+                resolve({
+                  window: iframe2.contentWindow,
+                  depth: 2,
+                  cleanup: () => div.remove()
+                });
+              };
+
+              // Trigger load
+              iframe2.src = 'about:blank';
+            } catch (e) {
+              resolve({ error: 'Second iframe error: ' + e.message, window: iframe1.contentWindow });
+            }
+          };
+
+          // Trigger load
+          iframe1.src = 'about:blank';
+        } catch (e) {
+          resolve({ error: 'Phantom creation failed: ' + e.message, window: window });
+        }
+      });
+    }
+
+    // Run full phantom darkness test
+    async function runPhantomDarknessTest() {
+      const output = document.getElementById('phantom-output');
+      const results = {
+        mainFrame: {},
+        phantomFrame: {},
+        comparison: {}
+      };
+
+      output.textContent = 'Creating Phantom Darkness (doubly-nested iframe)...\n';
+
+      // Test properties to check
+      const navigatorProps = ['userAgent', 'platform', 'vendor', 'language', 'languages',
+        'hardwareConcurrency', 'deviceMemory', 'maxTouchPoints', 'appVersion', 'appName',
+        'appCodeName', 'product', 'productSub', 'plugins', 'mimeTypes', 'webdriver'];
+
+      const screenProps = ['width', 'height', 'availWidth', 'availHeight', 'colorDepth', 'pixelDepth'];
+
+      const htmlElementProps = ['offsetWidth', 'offsetHeight'];
+
+      // Test main frame first
+      output.textContent += '\n=== MAIN FRAME TESTS ===\n';
+
+      results.mainFrame.Navigator = {};
+      for (const prop of navigatorProps) {
+        const result = testProperty(window, Navigator, prop, true);
+        results.mainFrame.Navigator[prop] = result;
+        if (result.lies.length > 0 || result.error) {
+          output.textContent += `Navigator.${prop}: ${result.error || result.lies.join(', ')}\n`;
+        }
+      }
+
+      results.mainFrame.Screen = {};
+      for (const prop of screenProps) {
+        const result = testProperty(window, Screen, prop, true);
+        results.mainFrame.Screen[prop] = result;
+        if (result.lies.length > 0 || result.error) {
+          output.textContent += `Screen.${prop}: ${result.error || result.lies.join(', ')}\n`;
+        }
+      }
+
+      results.mainFrame.HTMLElement = {};
+      for (const prop of htmlElementProps) {
+        const result = testProperty(window, HTMLElement, prop, true);
+        results.mainFrame.HTMLElement[prop] = result;
+        if (result.lies.length > 0 || result.error) {
+          output.textContent += `HTMLElement.${prop}: ${result.error || result.lies.join(', ')}\n`;
+        }
+      }
+
+      // Count main frame issues
+      let mainFrameIssues = 0;
+      for (const cat of Object.values(results.mainFrame)) {
+        for (const test of Object.values(cat)) {
+          if (test.lies?.length > 0 || test.error) mainFrameIssues++;
+        }
+      }
+      output.textContent += `Main Frame: ${mainFrameIssues} issues\n`;
+
+      // Create phantom darkness
+      const phantom = await createPhantomDarkness();
+
+      if (phantom.error) {
+        output.textContent += `\nPhantom Error: ${phantom.error}\n`;
+        results.phantomError = phantom.error;
+      }
+
+      const phantomScope = phantom.window;
+      output.textContent += `\n=== PHANTOM DARKNESS TESTS (depth: ${phantom.depth || 1}) ===\n`;
+
+      // Test in phantom darkness
+      results.phantomFrame.Navigator = {};
+      for (const prop of navigatorProps) {
+        try {
+          const result = testProperty(phantomScope, phantomScope.Navigator, prop, true);
+          results.phantomFrame.Navigator[prop] = result;
+          if (result.lies.length > 0 || result.error) {
+            output.textContent += `Navigator.${prop}: ${result.error || result.lies.join(', ')}\n`;
+          }
+        } catch (e) {
+          results.phantomFrame.Navigator[prop] = { error: e.message };
+          output.textContent += `Navigator.${prop}: EXCEPTION - ${e.message}\n`;
+        }
+      }
+
+      results.phantomFrame.Screen = {};
+      for (const prop of screenProps) {
+        try {
+          const result = testProperty(phantomScope, phantomScope.Screen, prop, true);
+          results.phantomFrame.Screen[prop] = result;
+          if (result.lies.length > 0 || result.error) {
+            output.textContent += `Screen.${prop}: ${result.error || result.lies.join(', ')}\n`;
+          }
+        } catch (e) {
+          results.phantomFrame.Screen[prop] = { error: e.message };
+          output.textContent += `Screen.${prop}: EXCEPTION - ${e.message}\n`;
+        }
+      }
+
+      results.phantomFrame.HTMLElement = {};
+      for (const prop of htmlElementProps) {
+        try {
+          const result = testProperty(phantomScope, phantomScope.HTMLElement, prop, true);
+          results.phantomFrame.HTMLElement[prop] = result;
+          if (result.lies.length > 0 || result.error) {
+            output.textContent += `HTMLElement.${prop}: ${result.error || result.lies.join(', ')}\n`;
+          }
+        } catch (e) {
+          results.phantomFrame.HTMLElement[prop] = { error: e.message };
+          output.textContent += `HTMLElement.${prop}: EXCEPTION - ${e.message}\n`;
+        }
+      }
+
+      // Count phantom frame issues
+      let phantomFrameIssues = 0;
+      for (const cat of Object.values(results.phantomFrame)) {
+        for (const test of Object.values(cat)) {
+          if (test.lies?.length > 0 || test.error) phantomFrameIssues++;
+        }
+      }
+      output.textContent += `Phantom Frame: ${phantomFrameIssues} issues\n`;
+
+      // Detailed comparison
+      output.textContent += '\n=== DETAILED COMPARISON ===\n';
+
+      // Compare each property
+      for (const category of ['Navigator', 'Screen', 'HTMLElement']) {
+        for (const prop of Object.keys(results.mainFrame[category] || {})) {
+          const mainResult = results.mainFrame[category][prop];
+          const phantomResult = results.phantomFrame[category]?.[prop];
+
+          const mainOk = !mainResult.error && mainResult.lies?.length === 0;
+          const phantomOk = phantomResult && !phantomResult.error && phantomResult.lies?.length === 0;
+
+          if (mainOk !== phantomOk) {
+            output.textContent += `\n${category}.${prop} DIFFERS:\n`;
+            output.textContent += `  Main: ${mainOk ? 'OK' : (mainResult.error || mainResult.lies?.join(', '))}\n`;
+            output.textContent += `  Phantom: ${phantomOk ? 'OK' : (phantomResult?.error || phantomResult?.lies?.join(', '))}\n`;
+
+            // Show detailed test results
+            if (phantomResult && phantomResult.allTests) {
+              const failedTests = Object.entries(phantomResult.allTests)
+                .filter(([k, v]) => v)
+                .map(([k]) => k);
+              if (failedTests.length > 0) {
+                output.textContent += `  Failed tests: ${failedTests.join(', ')}\n`;
+              }
+            }
+          }
+        }
+      }
+
+      // Summary
+      output.textContent += '\n=== SUMMARY ===\n';
+      output.textContent += `Main Frame Issues: ${mainFrameIssues}\n`;
+      output.textContent += `Phantom Frame Issues: ${phantomFrameIssues}\n`;
+
+      if (phantomFrameIssues > mainFrameIssues) {
+        output.textContent += '\n⚠️ MORE ISSUES IN PHANTOM FRAME - Spoofs may not be injecting into nested iframes!\n';
+      }
+
+      // Cleanup
+      if (phantom.cleanup) phantom.cleanup();
+
+      window.OWL_DEBUG.phantomTest = results;
+      console.log('Phantom Test Results:', JSON.stringify(results, null, 2));
+
+      return results;
+    }
+
+    // Collect VM Profile data from main frame
+    function collectVMProfile() {
+      const profile = {
+        navigator: {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language,
+          languages: [...navigator.languages],
+          hardwareConcurrency: navigator.hardwareConcurrency,
+          deviceMemory: navigator.deviceMemory,
+          maxTouchPoints: navigator.maxTouchPoints,
+          vendor: navigator.vendor,
+          webdriver: navigator.webdriver,
+          appVersion: navigator.appVersion,
+          appName: navigator.appName,
+          appCodeName: navigator.appCodeName,
+          product: navigator.product,
+          productSub: navigator.productSub,
+          plugins: navigator.plugins ? navigator.plugins.length : 0,
+          mimeTypes: navigator.mimeTypes ? navigator.mimeTypes.length : 0
+        },
+        screen: {
+          width: screen.width,
+          height: screen.height,
+          availWidth: screen.availWidth,
+          availHeight: screen.availHeight,
+          colorDepth: screen.colorDepth,
+          pixelDepth: screen.pixelDepth,
+          availTop: screen.availTop,
+          availLeft: screen.availLeft
+        },
+        window: {
+          devicePixelRatio: window.devicePixelRatio,
+          innerWidth: window.innerWidth,
+          innerHeight: window.innerHeight,
+          outerWidth: window.outerWidth,
+          outerHeight: window.outerHeight
+        },
+        webgl: (() => {
+          try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return { error: 'WebGL not available' };
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            return {
+              vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR),
+              renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)
+            };
+          } catch (e) {
+            return { error: e.message };
+          }
+        })(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locale: Intl.DateTimeFormat().resolvedOptions().locale
+      };
+      return profile;
+    }
+
+    // Collect Worker data
+    async function collectWorkerData() {
+      return new Promise((resolve) => {
+        const workerCode = `
+          self.onmessage = function() {
+            const data = {
+              userAgent: navigator.userAgent,
+              platform: navigator.platform,
+              language: navigator.language,
+              languages: [...navigator.languages],
+              hardwareConcurrency: navigator.hardwareConcurrency,
+              deviceMemory: navigator.deviceMemory,
+              webdriver: navigator.webdriver
+            };
+            self.postMessage(data);
+          };
+        `;
+        try {
+          const blob = new Blob([workerCode], { type: 'application/javascript' });
+          const worker = new Worker(URL.createObjectURL(blob));
+          const timeout = setTimeout(() => {
+            worker.terminate();
+            resolve({ error: 'Worker timeout' });
+          }, 3000);
+
+          worker.onmessage = (e) => {
+            clearTimeout(timeout);
+            worker.terminate();
+            resolve(e.data);
+          };
+          worker.onerror = (e) => {
+            clearTimeout(timeout);
+            worker.terminate();
+            resolve({ error: e.message });
+          };
+          worker.postMessage('collect');
+        } catch (e) {
+          resolve({ error: e.message });
+        }
+      });
+    }
+
+    // Wait for CreepJS to finish and expose results
+    async function checkForResults() {
+      if (window.Fingerprint && window.Creep) {
+        await displayLieResults();
+      } else {
+        setTimeout(checkForResults, 500);
+      }
+    }
+
+    async function displayLieResults() {
+      const lieCountEl = document.getElementById('lieCount');
+      const lieTypesEl = document.getElementById('lieTypes');
+      const liesDetailEl = document.getElementById('lies-detail');
+      const vmProfileEl = document.getElementById('vm-profile-output');
+      const workerOutputEl = document.getElementById('worker-output');
+
+      // Access the lies from CreepJS
+      const fp = window.Fingerprint;
+      const creep = window.Creep;
+
+      // Collect VM Profile
+      const vmProfile = collectVMProfile();
+      vmProfileEl.textContent = JSON.stringify(vmProfile, null, 2);
+      window.OWL_DEBUG.vmProfile = vmProfile;
+
+      // Collect Worker data
+      const workerData = await collectWorkerData();
+      workerOutputEl.textContent = JSON.stringify(workerData, null, 2);
+      window.OWL_DEBUG.workerData = workerData;
+
+      // Get lies data
+      let liesData = null;
+      let totalLies = 0;
+
+      if (fp && fp.lies) {
+        liesData = fp.lies;
+        totalLies = liesData.totalLies || 0;
+      } else if (creep && creep.lies) {
+        liesData = creep.lies;
+        totalLies = liesData.totalLies || 0;
+      }
+
+      // Store in debug object
+      window.OWL_DEBUG.lies = liesData;
+      window.OWL_DEBUG.fingerprint = { fp, creep };
+      window.OWL_DEBUG.timestamp = new Date().toISOString();
+      window.OWL_DEBUG.ready = true;
+
+      if (liesData) {
+        lieCountEl.textContent = totalLies;
+        lieCountEl.className = totalLies > 0 ? 'value lies-detected' : 'value no-lies';
+
+        // Count lie types
+        const lieTypeSet = new Set();
+        if (liesData.data) {
+          Object.values(liesData.data).forEach(lies => {
+            lies.forEach(lie => lieTypeSet.add(lie));
+          });
+        }
+        lieTypesEl.textContent = lieTypeSet.size;
+
+        // Display detailed lies
+        if (liesData.data && Object.keys(liesData.data).length > 0) {
+          let html = '<h3>Detected Lies:</h3>';
+          Object.entries(liesData.data).sort().forEach(([prop, lies]) => {
+            html += `<div class="lie-entry">
+              <div class="prop-name">${prop}</div>
+              ${lies.map(lie => `<div class="lie-type">• ${lie}</div>`).join('')}
+            </div>`;
+          });
+          liesDetailEl.innerHTML = html;
+        } else {
+          liesDetailEl.innerHTML = '<div class="no-lies-msg">No lies detected!</div>';
+        }
+
+        // === CRITICAL: Console output for MCP extraction ===
+        console.log('=== OWL LIE DETECTOR RESULTS ===');
+        console.log('Total Lies:', totalLies);
+        console.log('Lies Data:', JSON.stringify(liesData, null, 2));
+        console.log('=== OWL_DEBUG READY ===');
+
+        // Output compact JSON for easy extraction
+        console.log('OWL_DEBUG_JSON:', JSON.stringify({
+          totalLies,
+          lieTypes: Array.from(lieTypeSet),
+          lies: liesData.data,
+          vmProfile,
+          workerData
+        }));
+      } else {
+        lieCountEl.textContent = 'Unable to retrieve';
+        liesDetailEl.innerHTML = '<div class="error">Could not access lie detection results. Check console.</div>';
+        console.error('Could not access lie detection results');
+        console.log('window.Fingerprint:', window.Fingerprint);
+        console.log('window.Creep:', window.Creep);
+      }
+
+      // Auto-run phantom test
+      await runPhantomDarknessTest();
+    }
+
+    // Button handlers
+    document.getElementById('showLiesBtn').addEventListener('click', function() {
+      document.getElementById('fp-app').style.display = 'none';
+      document.getElementById('lies-detail').style.display = 'block';
+    });
+
+    document.getElementById('showFullBtn').addEventListener('click', function() {
+      document.getElementById('fp-app').style.display = 'block';
+      document.getElementById('lies-detail').style.display = 'block';
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      const data = {
+        fingerprint: window.Fingerprint,
+        creep: window.Creep,
+        owlDebug: window.OWL_DEBUG,
+        timestamp: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'creepjs-results.json';
+      a.click();
+    });
+
+    document.getElementById('copyResultsBtn').addEventListener('click', function() {
+      const debugJson = JSON.stringify(window.OWL_DEBUG, null, 2);
+      navigator.clipboard.writeText(debugJson).then(() => {
+        this.textContent = 'Copied!';
+        setTimeout(() => { this.textContent = 'Copy Debug JSON'; }, 2000);
+      });
+    });
+
+    document.getElementById('runPhantomTest').addEventListener('click', function() {
+      runPhantomDarknessTest();
+    });
+
+    // Start checking for results
+    setTimeout(checkForResults, 1000);
+  </script>
+</body>
+</html>

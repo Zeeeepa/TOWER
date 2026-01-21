@@ -1,0 +1,60 @@
+# ==============================================================================
+# Owl Browser License Server - Development Override
+# ==============================================================================
+# This override file mounts source code for live updates without rebuilding.
+#
+# Usage:
+#   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Or set as default:
+#   export COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
+#   docker-compose up -d
+#
+# After making code changes:
+#   docker exec owl-license-server supervisorctl restart admin-server
+#   docker exec owl-license-server supervisorctl restart subscription-server
+#   # Or restart both:
+#   docker exec owl-license-server supervisorctl restart owl-license-server:
+#
+# ==============================================================================
+
+services:
+  owl-license-server:
+    # Mount source code for live development
+    volumes:
+      # Python source files (read-write for development)
+      - ./src/admin_server.py:/app/admin_server.py:ro
+      - ./src/subscription_server.py:/app/subscription_server.py:ro
+      - ./src/customer_portal.py:/app/customer_portal.py:ro
+      - ./src/config.py:/app/config.py:ro
+      - ./src/database.py:/app/database.py:ro
+      - ./src/init_database.py:/app/init_database.py:ro
+      - ./src/email_service.py:/app/email_service.py:ro
+      - ./src/scheduler_service.py:/app/scheduler_service.py:ro
+
+      # Templates (for UI changes)
+      - ./templates:/app/templates:ro
+
+      # Static files (CSS, JS, images)
+      - ./static:/app/static:ro
+
+      # Keys, data, licenses, logs (from base compose)
+      - ./keys:/app/keys:ro
+      - owl-db-data:/var/lib/postgresql/17/main
+      - ./data:/app/data
+      - ./licenses:/app/licenses
+      - ./logs:/app/logs
+
+    # Development environment
+    environment:
+      # Enable debug mode for Flask (auto-reload would conflict with supervisor)
+      - FLASK_DEBUG=1
+      - FLASK_ENV=development
+
+      # Show more detailed logs
+      - LOG_LEVEL=DEBUG
+
+# Use the same volume from base compose
+volumes:
+  owl-db-data:
+    driver: local

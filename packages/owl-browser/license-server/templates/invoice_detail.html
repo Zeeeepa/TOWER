@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('invoices_list') }}">Invoices</a></li>
+            <li class="breadcrumb-item active">{{ invoice.invoice_number }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Invoice Details -->
+        <div class="card mb-4">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-receipt me-2"></i>Invoice {{ invoice.invoice_number }}
+                </h5>
+                {% if invoice.status == 'paid' %}
+                <span class="badge bg-success fs-6">Paid</span>
+                {% elif invoice.status == 'pending' %}
+                <span class="badge bg-warning text-dark fs-6">Pending</span>
+                {% elif invoice.status == 'overdue' %}
+                <span class="badge bg-danger fs-6">Overdue</span>
+                {% elif invoice.status == 'voided' %}
+                <span class="badge bg-secondary fs-6">Voided</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Bill To</h6>
+                        {% if customer %}
+                        <p class="mb-0">
+                            <strong>{{ customer.name }}</strong><br>
+                            {% if customer.company %}{{ customer.company }}<br>{% endif %}
+                            {{ customer.email }}<br>
+                            {% if customer.address_line1 %}
+                            {{ customer.address_line1 }}<br>
+                            {% if customer.address_line2 %}{{ customer.address_line2 }}<br>{% endif %}
+                            {{ customer.city }}{% if customer.state %}, {{ customer.state }}{% endif %} {{ customer.postal_code }}<br>
+                            {{ customer.country }}
+                            {% endif %}
+                        </p>
+                        {% else %}
+                        <p class="text-muted mb-0">No customer information</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <h6 class="text-muted">Invoice Details</h6>
+                        <p class="mb-0">
+                            <strong>Date:</strong> {{ invoice.created_at|datetime }}<br>
+                            {% if invoice.due_date %}
+                            <strong>Due Date:</strong> {{ invoice.due_date|datetime }}<br>
+                            {% endif %}
+                            {% if invoice.paid_at %}
+                            <strong>Paid:</strong> {{ invoice.paid_at|datetime }}<br>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Invoice Items -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-end">Qty</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.description }}</td>
+                                <td class="text-end">{{ item.quantity }}</td>
+                                <td class="text-end">{{ invoice.currency }} {{ '%.2f'|format(item.unit_price) }}</td>
+                                <td class="text-end">{{ invoice.currency }} {{ '%.2f'|format(item.amount) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No items</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Subtotal</strong></td>
+                                <td class="text-end">{{ invoice.currency }} {{ '%.2f'|format(invoice.subtotal) }}</td>
+                            </tr>
+                            {% if invoice.tax_amount and invoice.tax_amount > 0 %}
+                            <tr>
+                                <td colspan="3" class="text-end">Tax ({{ invoice.tax_rate }}%)</td>
+                                <td class="text-end">{{ invoice.currency }} {{ '%.2f'|format(invoice.tax_amount) }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if invoice.discount_amount and invoice.discount_amount > 0 %}
+                            <tr>
+                                <td colspan="3" class="text-end text-success">Discount</td>
+                                <td class="text-end text-success">-{{ invoice.currency }} {{ '%.2f'|format(invoice.discount_amount) }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr class="table-active">
+                                <td colspan="3" class="text-end"><strong class="fs-5">Total</strong></td>
+                                <td class="text-end"><strong class="fs-5">{{ invoice.currency }} {{ '%.2f'|format(invoice.total) }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                {% if invoice.notes %}
+                <div class="mt-4">
+                    <h6 class="text-muted">Notes</h6>
+                    <p class="mb-0">{{ invoice.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Actions -->
+        <div class="card mb-4">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0"><i class="bi bi-lightning me-2"></i>Actions</h6>
+            </div>
+            <div class="card-body">
+                {% if invoice.status == 'pending' %}
+                <form action="{{ url_for('invoice_mark_paid', invoice_id=invoice.id) }}" method="POST" class="mb-3">
+                    <div class="mb-2">
+                        <label class="form-label small">Payment Method</label>
+                        <select name="payment_method" class="form-select form-select-sm">
+                            <option value="manual">Manual / Cash</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="paypal">PayPal</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Reference (optional)</label>
+                        <input type="text" name="payment_ref" class="form-control form-control-sm">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle me-1"></i>Mark as Paid
+                    </button>
+                </form>
+                <form action="{{ url_for('invoice_void', invoice_id=invoice.id) }}" method="POST">
+                    <button type="submit" class="btn btn-outline-danger w-100"
+                            onclick="return confirm('Are you sure you want to void this invoice?')">
+                        <i class="bi bi-x-circle me-1"></i>Void Invoice
+                    </button>
+                </form>
+                {% elif invoice.status == 'paid' %}
+                <div class="text-center py-3">
+                    <i class="bi bi-check-circle text-success display-4"></i>
+                    <p class="mb-0 mt-2">This invoice has been paid</p>
+                    {% if invoice.payment_method %}
+                    <small class="text-muted">via {{ invoice.payment_method }}</small>
+                    {% endif %}
+                </div>
+                {% elif invoice.status == 'voided' %}
+                <div class="text-center py-3">
+                    <i class="bi bi-x-circle text-secondary display-4"></i>
+                    <p class="mb-0 mt-2">This invoice has been voided</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Payment Info -->
+        {% if invoice.status == 'paid' %}
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0"><i class="bi bi-credit-card me-2"></i>Payment Info</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted d-block">Payment Date</small>
+                    {{ invoice.paid_at|datetime }}
+                </div>
+                {% if invoice.payment_method %}
+                <div class="mb-2">
+                    <small class="text-muted d-block">Payment Method</small>
+                    {{ invoice.payment_method|capitalize }}
+                </div>
+                {% endif %}
+                {% if invoice.payment_reference %}
+                <div>
+                    <small class="text-muted d-block">Reference</small>
+                    <code>{{ invoice.payment_reference }}</code>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

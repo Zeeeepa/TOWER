@@ -1,0 +1,261 @@
+{% extends "customer/base.html" %}
+
+{% block title %}Dashboard - Owl Browser Customer Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="glow-text mb-1">Welcome, {{ user.license_name or user.email }}</h2>
+        <p class="text-muted mb-0">Manage your Owl Browser license and account</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-4 mb-4">
+    <!-- License Status -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1">License Status</p>
+                        <div class="d-flex align-items-center">
+                            <span class="status-dot {{ user.license_status }}"></span>
+                            <span class="stat-value">{{ user.license_status|capitalize }}</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-{{ 'success' if user.license_status == 'active' else 'danger' }} bg-opacity-25">
+                        <i class="bi bi-shield-check text-light"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- License Type -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1">License Type</p>
+                        <span class="badge badge-license-type badge-{{ license_types.get(user.license_type, 'unknown')|lower }}">
+                            {{ license_types.get(user.license_type, 'Unknown') }}
+                        </span>
+                    </div>
+                    <div class="stat-icon bg-primary bg-opacity-25">
+                        <i class="bi bi-award-fill text-light"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Devices -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1">Active Devices</p>
+                        {% set active_seats = licenses[0].active_seats if licenses else 0 %}
+                        <p class="stat-value mb-0">{{ active_seats }} / {{ user.max_seats }}</p>
+                    </div>
+                    <div class="stat-icon bg-info bg-opacity-25">
+                        <i class="bi bi-laptop text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expiry -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1">Expires</p>
+                        {% if user.expiry_date %}
+                        <p class="stat-value mb-0 small">{{ user.expiry_date|date }}</p>
+                        {% else %}
+                        <span class="badge bg-success">Never</span>
+                        {% endif %}
+                    </div>
+                    <div class="stat-icon bg-warning bg-opacity-25">
+                        <i class="bi bi-calendar text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- License Info Card -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-key-fill me-2 text-primary"></i>License Information
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if licenses and licenses|length > 0 %}
+                {% set license = licenses[0] %}
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">License ID</h6>
+                        <code class="d-block p-2 bg-dark rounded small">{{ license.id }}</code>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Registered To</h6>
+                        <p class="mb-0">{{ license.name }}</p>
+                        <small class="text-muted">{{ license.email }}</small>
+                    </div>
+                    {% if license.organization %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Organization</h6>
+                        <p class="mb-0">{{ license.organization }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Issue Date</h6>
+                        <p class="mb-0">{{ license.issue_date|date if license.issue_date else 'N/A' }}</p>
+                    </div>
+                    {% if user.plan_name %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Plan</h6>
+                        <span class="badge bg-info">{{ user.plan_name }}</span>
+                        {% if user.plan_price %}
+                        <span class="text-muted ms-2">${{ '%.2f'|format(user.plan_price) }}/mo</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('customer.license_detail', license_id=license.id) }}" class="btn btn-primary">
+                        <i class="bi bi-eye me-2"></i>View Details
+                    </a>
+                </div>
+                {% else %}
+                <p class="text-muted">No license information available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Subscription Info (if applicable) -->
+        {% if subscription %}
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-repeat me-2 text-info"></i>Subscription Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Status</h6>
+                        <span class="badge bg-{{ 'success' if subscription.status == 'active' else 'danger' }} fs-6">
+                            {{ subscription.status|capitalize }}
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Last Check</h6>
+                        <p class="mb-0">{{ subscription.last_check_date|date if subscription.last_check_date else 'Never' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Next Check</h6>
+                        <p class="mb-0">{{ subscription.next_check_date|date if subscription.next_check_date else 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Side Panel -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning me-2 text-warning"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('customer.licenses') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-laptop me-2"></i>Manage Devices
+                    </a>
+                    <a href="{{ url_for('customer.profile') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-person me-2"></i>Edit Profile
+                    </a>
+                    <a href="{{ url_for('customer.billing') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-receipt me-2"></i>View Invoices
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Invoices -->
+        {% if invoices %}
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-receipt me-2 text-success"></i>Recent Invoices
+                </h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for invoice in invoices[:3] %}
+                <a href="{{ url_for('customer.invoice_detail', invoice_id=invoice.id) }}"
+                   class="list-group-item list-group-item-action bg-transparent border-secondary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ invoice.invoice_number }}</strong>
+                            <br><small class="text-muted">{{ invoice.created_at|date }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ 'success' if invoice.status == 'paid' else 'warning' }}">
+                                {{ invoice.status|capitalize }}
+                            </span>
+                            <br><small>${{ '%.2f'|format(invoice.total or 0) }}</small>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="card-footer bg-transparent border-secondary">
+                <a href="{{ url_for('customer.billing') }}" class="text-muted small">
+                    View all invoices <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Account Info -->
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Account Info
+                </h5>
+            </div>
+            <div class="card-body small">
+                <p class="mb-2">
+                    <span class="text-muted">Email:</span><br>
+                    {{ user.email }}
+                </p>
+                <p class="mb-2">
+                    <span class="text-muted">Account Created:</span><br>
+                    {{ user.created_at|date if user.created_at else 'N/A' }}
+                </p>
+                <p class="mb-0">
+                    <span class="text-muted">Last Login:</span><br>
+                    {{ user.last_login_at|date if user.last_login_at else 'First login' }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

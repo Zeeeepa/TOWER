@@ -1,0 +1,69 @@
+# =============================================================================
+# Docker Build Ignore
+# =============================================================================
+# Files and directories to exclude from Docker build context
+# =============================================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Build directories (will be created fresh)
+build/
+dist/
+node_modules/
+
+# Third-party binaries (will be downloaded fresh)
+third_party/cef_linux/
+third_party/cef_macos/
+third_party/llama_linux/
+third_party/llama_macos/
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+*.app
+
+# Documentation (not needed in image)
+*.md
+!http-server/README.md
+docs/
+
+# Tests (not needed in production image)
+tests/
+*.test.js
+*.spec.js
+
+# Development files
+.env
+.env.*
+*.log
+*.tmp
+
+# Generated files (will be regenerated during Docker build with correct secrets)
+include/stealth/owl_vm_db_key.h
+data/profiles/vm_profiles.db
+
+# SDK (not needed in server image)
+sdk/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Misc
+*.bak
+*.orig
+Makefile

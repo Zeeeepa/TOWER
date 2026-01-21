@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Customer' if is_edit else 'New Customer' }} - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('customers_list') }}">Customers</a></li>
+            {% if is_edit %}
+            <li class="breadcrumb-item"><a href="{{ url_for('customer_detail', customer_id=customer.id) }}">{{ customer.name }}</a></li>
+            <li class="breadcrumb-item active">Edit</li>
+            {% else %}
+            <li class="breadcrumb-item active">New Customer</li>
+            {% endif %}
+        </ol>
+    </nav>
+    <h2 class="glow-text mb-1">{{ 'Edit Customer' if is_edit else 'New Customer' }}</h2>
+    <p class="text-muted mb-0">{{ 'Update customer information' if is_edit else 'Create a new customer account' }}</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <!-- Basic Information -->
+                    <h5 class="mb-3"><i class="bi bi-person me-2"></i>Basic Information</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" required
+                                   value="{{ form_data.get('name', '') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" required
+                                   value="{{ form_data.get('email', '') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Company</label>
+                            <input type="text" name="company" class="form-control"
+                                   value="{{ form_data.get('company', '') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" name="phone" class="form-control"
+                                   value="{{ form_data.get('phone', '') }}">
+                        </div>
+                        {% if is_edit %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="active" {{ 'selected' if form_data.get('status') == 'active' }}>Active</option>
+                                <option value="inactive" {{ 'selected' if form_data.get('status') == 'inactive' }}>Inactive</option>
+                                <option value="suspended" {{ 'selected' if form_data.get('status') == 'suspended' }}>Suspended</option>
+                            </select>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Address -->
+                    <h5 class="mb-3"><i class="bi bi-geo-alt me-2"></i>Address</h5>
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Address Line 1</label>
+                            <input type="text" name="address_line1" class="form-control"
+                                   value="{{ form_data.get('address_line1', '') }}">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Address Line 2</label>
+                            <input type="text" name="address_line2" class="form-control"
+                                   value="{{ form_data.get('address_line2', '') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">City</label>
+                            <input type="text" name="city" class="form-control"
+                                   value="{{ form_data.get('city', '') }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">State/Province</label>
+                            <input type="text" name="state" class="form-control"
+                                   value="{{ form_data.get('state', '') }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" name="postal_code" class="form-control"
+                                   value="{{ form_data.get('postal_code', '') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Country</label>
+                            <input type="text" name="country" class="form-control"
+                                   value="{{ form_data.get('country', '') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tax ID / VAT Number</label>
+                            <input type="text" name="tax_id" class="form-control"
+                                   value="{{ form_data.get('tax_id', '') }}">
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <h5 class="mb-3"><i class="bi bi-sticky me-2"></i>Notes</h5>
+                    <div class="mb-4">
+                        <textarea name="notes" class="form-control" rows="3"
+                                  placeholder="Internal notes about this customer">{{ form_data.get('notes', '') }}</textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>{{ 'Update Customer' if is_edit else 'Create Customer' }}
+                        </button>
+                        <a href="{{ url_for('customer_detail', customer_id=customer.id) if is_edit else url_for('customers_list') }}"
+                           class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Tips</h6>
+            </div>
+            <div class="card-body">
+                <ul class="small text-muted mb-0">
+                    <li class="mb-2">Customer email must be unique</li>
+                    <li class="mb-2">Address information is used for invoicing</li>
+                    <li class="mb-2">Tax ID is required for business invoices in some countries</li>
+                    <li>Notes are for internal use only</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

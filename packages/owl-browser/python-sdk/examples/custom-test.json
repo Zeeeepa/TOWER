@@ -1,0 +1,74 @@
+{
+  "name": "Custom Test",
+  "description": "Flow created with Owl Browser Control Panel",
+  "steps": [
+    {
+      "type": "navigate",
+      "selected": true,
+      "url": "owl://user_form.html"
+    },
+    {
+      "type": "wait_for_selector",
+      "selected": true,
+      "selector": "first name",
+      "timeout": 5000
+    },
+    {
+      "type": "type",
+      "selected": true,
+      "selector": "first name",
+      "text": "James"
+    },
+    {
+      "type": "type",
+      "selected": true,
+      "selector": "last name",
+      "text": "Bond"
+    },
+    {
+      "type": "type",
+      "selected": true,
+      "selector": "email",
+      "text": "mr.bond@mi6.com"
+    },
+    {
+      "type": "type",
+      "selected": true,
+      "selector": "phone",
+      "text": "0070070007"
+    },
+    {
+      "type": "type",
+      "selected": true,
+      "selector": "username",
+      "text": "jbond"
+    },
+    {
+      "type": "type",
+      "selected": true,
+      "selector": "password",
+      "text": "iLoveM@mi6"
+    },
+    {
+      "type": "type",
+      "selected": true,
+      "selector": "confirm password",
+      "text": "iLoveM@mi6"
+    },
+    {
+      "type": "pick",
+      "selected": true,
+      "selector": "country",
+      "value": "United Kingdom"
+    },
+    {
+      "type": "click",
+      "selected": true,
+      "selector": "I agree checkbox"
+    },
+    {
+      "type": "solve_captcha",
+      "selected": true
+    }
+  ]
+}

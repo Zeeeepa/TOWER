@@ -1,0 +1,241 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "willow",
+  "name": "TestDriver",
+  "colors": {
+    "primary": "#b3d334",
+    "light": "#b3d334",
+    "dark": "#152a65"
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "favicon": "/images/template/icon.png",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Overview",
+        "pages": [
+          "/overview/what-is-testdriver",
+          {
+            "group": "Concepts",
+            "icon": "book",
+            "pages": [
+              "/features/selectorless",
+              "/overview/comparison",
+              "/overview/performance",
+              "/overview/faq"
+            ]
+          },
+          "/account/enterprise"
+        ]
+      },
+      {
+        "group": "Get Started",
+        "pages": [
+          "/overview/quickstart",
+          {
+            "group": "CLI",
+            "icon": "terminal",
+            "pages": [
+              "/cli/overview",
+              {
+                "group": "Commands",
+                "icon": "command",
+                "pages": [
+                  "/interactive/explore",
+                  "/interactive/run",
+                  "/interactive/save"
+                ]
+              }
+            ]
+          },
+          "/getting-started/self-hosting",
+          "/getting-started/playwright",
+          "/getting-started/vscode"
+        ]
+      },
+      {
+        "group": "Examples",
+        "pages": [
+          {
+            "group": "Apps",
+            "icon": "laptop",
+            "pages": [
+              "apps/static-websites",
+              "apps/desktop-apps",
+              "apps/chrome-extensions",
+              "apps/mobile-apps",
+              "apps/tauri-apps"
+            ]
+          },
+          {
+            "group": "Scenarios",
+            "icon": "computer-mouse",
+            "pages": [
+              "scenarios/ai-chatbot",
+              "scenarios/cookie-banner",
+              "scenarios/file-upload",
+              "scenarios/form-filling",
+              "scenarios/log-in",
+              "scenarios/pdf-generation",
+              "scenarios/spell-check"
+            ]
+          },
+          {
+            "group": "Build Systems",
+            "icon": "helmet-safety",
+            "pages": [
+              "/integrations/electron",
+              "/integrations/netlify",
+              "/integrations/vercel"
+            ]
+          }
+        ]
+      },
+      {
+        "group": "Guide",
+        "pages": [
+          {
+            "group": "Configuration",
+            "icon": "desktop",
+            "pages": [
+              "/guide/authentication",
+              "/guide/variables",
+              "/guide/lifecycle",
+              "/guide/dashcam",
+              "/guide/environment-variables",
+              "/action/ami"
+            ]
+          },
+          {
+            "group": "Writing",
+            "icon": "pencil",
+            "pages": [
+              "/features/generation",
+              "/guide/locating",
+              "/guide/waiting",
+              "/guide/assertions",
+              "/guide/code",
+              "/features/reusable-snippets",
+              "/guide/protips"
+            ]
+          },
+          {
+            "group": "Importing",
+            "icon": "file-import",
+            "pages": [
+              "/importing/csv",
+              "/importing/gherkin",
+              "/importing/jira",
+              "/importing/testrail"
+            ]
+          },
+          {
+            "group": "Running",
+            "icon": "play",
+            "pages": [
+              "/getting-started/running",
+              "/getting-started/ci",
+              "/features/parallel-testing",
+              "/action/performance",
+              "/action/secrets"
+            ]
+          },
+          {
+            "group": "Maintaining",
+            "icon": "wrench",
+            "pages": ["/getting-started/editing", "/features/auto-healing"]
+          },
+          {
+            "group": "Reporting",
+            "icon": "chart-simple",
+            "pages": ["exporting/junit", "/bugs/jira"]
+          }
+        ]
+      },
+      {
+        "group": "Reference",
+        "pages": [
+          {
+            "group": "YAML",
+            "icon": "file-code",
+            "pages": [
+              "/commands/assert",
+              "/commands/exec",
+              "/commands/focus-application",
+              "/commands/hover-image",
+              "/commands/hover-text",
+              "/commands/if",
+              "/commands/match-image",
+              "/commands/press-keys",
+              "/commands/remember",
+              "/commands/run",
+              "/commands/scroll",
+              "/commands/scroll-until-image",
+              "/commands/scroll-until-text",
+              "/commands/type",
+              "/commands/wait",
+              "/commands/wait-for-image",
+              "/commands/wait-for-text"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/images/template/light.png",
+    "dark": "/images/template/dark.png",
+    "href": "https://testdriver.ai"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Discord",
+        "icon": "discord",
+        "href": "https://discord.com/invite/cWDFW8DzPm"
+      },
+      {
+        "label": "Book a Demo",
+        "href": "https://form.typeform.com/to/UECf9rDx?typeform-source=docs.testdriver.ai",
+        "icon": "calendar"
+      },
+      {
+        "icon": "gauge-high",
+        "label": "Dashboard",
+        "href": "https://app.testdriver.ai"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/testdriverai",
+      "github": "https://github.com/testdriverai",
+      "discord": "https://discord.com/invite/cWDFW8DzPm",
+      "youtube": "https://www.youtube.com/@testdriverai"
+    }
+  },
+  "redirects": [
+    {
+      "source": "/guides/github-actions",
+      "destination": "/action/setup"
+    },
+    {
+      "source": "/reference/test-steps",
+      "destination": "/features/selectorless"
+    },
+    {
+      "source": "/guides/debugging-test-runs",
+      "destination": "/getting-started/editing"
+    }
+  ],
+  "integrations": {
+    "segment": {
+      "key": "oh4PK60u4Qvm2DKIjxfhxd0KCdRbQsQE"
+    },
+    "posthog": {
+      "apiKey": "phc_ovOQ2HFpqFwPVqaxE5plJmI9buPMsz024FB2iajItqn"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>owl_browser_ui</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>com.olib.owlbrowser.ui</string>
+
+    <key>CFBundleName</key>
+    <string>Owl Browser</string>
+
+    <key>CFBundleDisplayName</key>
+    <string>Owl Browser</string>
+
+    <key>CFBundleVersion</key>
+    <string>1.0.0</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+
+    <!-- App Icon -->
+    <key>CFBundleIconFile</key>
+    <string>icon.icns</string>
+
+    <!-- SHOW in Dock and app switcher -->
+    <key>LSUIElement</key>
+    <false/>
+
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+
+    <key>NSHighResolutionCapable</key>
+    <true/>
+
+    <!-- Allow app to run on macOS 10.11+ -->
+    <key>LSMinimumSystemVersion</key>
+    <string>10.11.0</string>
+
+    <!-- Document types (optional - for opening URLs) -->
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>HTML Document</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.html</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- URL schemes -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>Web URL</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>http</string>
+                <string>https</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

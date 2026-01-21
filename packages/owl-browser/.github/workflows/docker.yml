@@ -1,0 +1,178 @@
+# =============================================================================
+# Owl Browser Docker Build Workflow
+# =============================================================================
+# Builds and publishes Docker images to GitHub Container Registry
+# Triggered on pushes to main/develop and Docker-related file changes
+# =============================================================================
+
+name: Docker Build
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'docker/**'
+      - 'src/**'
+      - 'include/**'
+      - 'http-server/**'
+      - 'CMakeLists.txt'
+      - 'package.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docker/**'
+      - 'Dockerfile'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build Docker Image
+  # ---------------------------------------------------------------------------
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            OWL_NONCE_HMAC_SECRET=${{ secrets.OWL_NONCE_HMAC_SECRET }}
+            OWL_VM_PROFILE_DB_PASS=${{ secrets.OWL_VM_PROFILE_DB_PASS }}
+
+      - name: Build test image (PR only)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          load: true
+          tags: owl-browser:pr-test
+          platforms: linux/amd64
+          cache-from: type=gha
+          build-args: |
+            OWL_NONCE_HMAC_SECRET=${{ secrets.OWL_NONCE_HMAC_SECRET }}
+            OWL_VM_PROFILE_DB_PASS=${{ secrets.OWL_VM_PROFILE_DB_PASS }}
+
+      - name: Test Docker image
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Starting container for testing..."
+          docker run --rm -d --name owl-test \
+            -e OWL_HTTP_TOKEN=test-token-ci \
+            -e OWL_DEV_MODE=true \
+            -e OWL_PANEL_PASSWORD=test-password \
+            --shm-size=2g \
+            -p 8080:8080 \
+            owl-browser:pr-test
+
+          echo "Waiting for container to start..."
+          sleep 15
+
+          echo "Checking container logs..."
+          docker logs owl-test
+
+          echo "Testing health endpoint..."
+          for i in {1..10}; do
+            if curl -sf http://localhost:8080/health; then
+              echo "Health check passed!"
+              break
+            fi
+            echo "Attempt $i failed, waiting..."
+            sleep 3
+          done
+
+          echo "Testing API endpoint..."
+          RESPONSE=$(curl -sf -X POST \
+            -H "Authorization: Bearer test-token-ci" \
+            -H "Content-Type: application/json" \
+            http://localhost:8080/execute/browser_create_context || echo "FAILED")
+
+          if [ "$RESPONSE" = "FAILED" ]; then
+            echo "API test failed"
+            docker logs owl-test
+            docker stop owl-test || true
+            exit 1
+          fi
+
+          echo "API Response: $RESPONSE"
+          docker stop owl-test
+          echo "Docker tests passed!"
+
+  # ---------------------------------------------------------------------------
+  # Security Scan
+  # ---------------------------------------------------------------------------
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-docker
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

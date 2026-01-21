@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Owl Browser - Customer Portal{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --owl-primary: #4E9179;
+            --owl-secondary: #9EBE8F;
+            --owl-accent: #6BB89D;
+            --owl-bg: #0A1628;
+            --owl-bg-light: #0F1F35;
+            --owl-bg-lighter: #152742;
+            --owl-success: #4E9179;
+            --owl-warning: #E5A84B;
+            --owl-danger: #DC6B6B;
+        }
+
+        body {
+            background: var(--owl-bg);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(10, 22, 40, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(78, 145, 121, 0.3);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--owl-primary), var(--owl-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar {
+            background: rgba(10, 22, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(78, 145, 121, 0.15);
+            min-height: calc(100vh - 56px);
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            margin: 2px 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover {
+            color: white;
+            background: rgba(78, 145, 121, 0.2);
+        }
+
+        .sidebar .nav-link.active {
+            color: white;
+            background: linear-gradient(135deg, var(--owl-primary), var(--owl-secondary));
+        }
+
+        .card {
+            background: var(--owl-bg-light);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(78, 145, 121, 0.2);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(78, 145, 121, 0.4);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(78, 145, 121, 0.15), rgba(158, 190, 143, 0.1));
+        }
+
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, white, rgba(255, 255, 255, 0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Button base styles */
+        .btn {
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        .btn-lg {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--owl-primary), var(--owl-accent));
+            border: none;
+            color: white;
+            box-shadow: 0 2px 8px rgba(78, 145, 121, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--owl-accent), var(--owl-primary));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(78, 145, 121, 0.4);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(78, 145, 121, 0.3);
+        }
+
+        .btn-outline-primary {
+            border: 1.5px solid var(--owl-primary);
+            color: var(--owl-primary);
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--owl-primary);
+            border-color: var(--owl-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(78, 145, 121, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--owl-bg-lighter);
+            border: 1.5px solid rgba(78, 145, 121, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-secondary:hover {
+            background: var(--owl-bg-light);
+            border-color: rgba(78, 145, 121, 0.5);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            background: transparent;
+        }
+
+        .btn-outline-secondary:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--owl-success), #3d7460);
+            border: none;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #3d7460, var(--owl-success));
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--owl-danger), #c45555);
+            border: none;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c45555, var(--owl-danger));
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--owl-warning), #c99035);
+            border: none;
+            color: #1a1a1a;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #c99035, var(--owl-warning));
+            color: #1a1a1a;
+        }
+
+        .btn-outline-danger {
+            border: 1.5px solid var(--owl-danger);
+            color: var(--owl-danger);
+            background: transparent;
+        }
+
+        .btn-outline-danger:hover {
+            background: var(--owl-danger);
+            color: white;
+        }
+
+        .btn-outline-success {
+            border: 1.5px solid var(--owl-success);
+            color: var(--owl-success);
+            background: transparent;
+        }
+
+        .btn-outline-success:hover {
+            background: var(--owl-success);
+            color: white;
+        }
+
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-hover-bg: rgba(78, 145, 121, 0.1);
+            --bs-table-border-color: rgba(78, 145, 121, 0.2);
+            margin-bottom: 0;
+        }
+
+        .table > thead {
+            background: var(--owl-bg-lighter);
+            border-bottom: 2px solid rgba(78, 145, 121, 0.3);
+        }
+
+        .table > thead > tr > th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 16px;
+            border-bottom: none;
+            white-space: nowrap;
+        }
+
+        .table > tbody > tr > td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(78, 145, 121, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .table > tbody > tr:last-child > td {
+            border-bottom: none;
+        }
+
+        .table > tbody > tr:hover {
+            background: rgba(78, 145, 121, 0.08);
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Compact table variant */
+        .table-sm > thead > tr > th {
+            padding: 10px 12px;
+        }
+
+        .table-sm > tbody > tr > td {
+            padding: 10px 12px;
+        }
+
+        .badge-license-type {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .badge-trial { background: linear-gradient(135deg, #64748b, #475569); }
+        .badge-starter { background: linear-gradient(135deg, #4E9179, #3d7460); }
+        .badge-business { background: linear-gradient(135deg, #9EBE8F, #7fa572); }
+        .badge-enterprise { background: linear-gradient(135deg, #E5A84B, #c99035); }
+        .badge-developer { background: linear-gradient(135deg, #6BB89D, #4E9179); }
+        .badge-subscription { background: linear-gradient(135deg, #4E9179, #9EBE8F); }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-dot.active { background: var(--owl-success); box-shadow: 0 0 8px var(--owl-success); }
+        .status-dot.expired { background: var(--owl-warning); box-shadow: 0 0 8px var(--owl-warning); }
+        .status-dot.revoked { background: var(--owl-danger); box-shadow: 0 0 8px var(--owl-danger); }
+        .status-dot.canceled { background: var(--owl-danger); box-shadow: 0 0 8px var(--owl-danger); }
+
+        .toast-container {
+            z-index: 9999;
+        }
+
+        .form-control, .form-select {
+            background: var(--owl-bg-lighter);
+            border: 1px solid rgba(78, 145, 121, 0.3);
+            color: white;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--owl-bg-light);
+            border-color: var(--owl-primary);
+            box-shadow: 0 0 0 3px rgba(78, 145, 121, 0.25);
+            color: white;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(78, 145, 121, 0.5);
+        }
+
+        .text-primary {
+            color: var(--owl-primary) !important;
+        }
+
+        a {
+            color: var(--owl-primary);
+        }
+
+        a:hover {
+            color: var(--owl-secondary);
+        }
+
+        .bg-primary {
+            background: var(--owl-primary) !important;
+        }
+
+        .bg-success {
+            background: var(--owl-success) !important;
+        }
+
+        .border-primary {
+            border-color: var(--owl-primary) !important;
+        }
+
+        .card-header {
+            background: var(--owl-bg-lighter);
+            border-bottom-color: rgba(78, 145, 121, 0.2);
+        }
+
+        .auth-container {
+            max-width: 450px;
+            margin: 0 auto;
+            padding-top: 60px;
+        }
+
+        .auth-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--owl-primary);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--owl-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--owl-primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--owl-secondary);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('customer.dashboard') if current_customer else url_for('customer.login') }}">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Owl" height="32" class="me-2">
+                <span>Owl Browser</span>
+            </a>
+            <div class="d-flex align-items-center">
+                {% if current_customer %}
+                <span class="text-muted me-3">
+                    <i class="bi bi-person-circle me-1"></i>{{ current_customer.email }}
+                </span>
+                <a href="{{ url_for('customer.logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </a>
+                {% else %}
+                <a href="{{ url_for('customer.login') }}" class="btn btn-outline-light btn-sm me-2">Login</a>
+                <a href="{{ url_for('customer.register') }}" class="btn btn-primary btn-sm">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if current_customer %}
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar py-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'customer.dashboard' %}active{% endif %}"
+                           href="{{ url_for('customer.dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Licenses Section -->
+                    <li class="nav-item mt-2">
+                        <small class="nav-link text-muted text-uppercase" style="font-size: 0.7rem;">My License</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'license' in request.endpoint %}active{% endif %}"
+                           href="{{ url_for('customer.licenses') }}">
+                            <i class="bi bi-key-fill me-2"></i>Licenses
+                        </a>
+                    </li>
+
+                    <!-- Account Section -->
+                    <li class="nav-item mt-3">
+                        <small class="nav-link text-muted text-uppercase" style="font-size: 0.7rem;">Account</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'customer.profile' %}active{% endif %}"
+                           href="{{ url_for('customer.profile') }}">
+                            <i class="bi bi-person-fill me-2"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'billing' in request.endpoint or 'invoice' in request.endpoint %}active{% endif %}"
+                           href="{{ url_for('customer.billing') }}">
+                            <i class="bi bi-receipt me-2"></i>Billing
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'customer.change_password' %}active{% endif %}"
+                           href="{{ url_for('customer.change_password') }}">
+                            <i class="bi bi-shield-lock me-2"></i>Security
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="toast-container position-fixed top-0 end-0 p-3">
+                    {% for category, message in messages %}
+                    <div class="toast show align-items-center text-bg-{{ 'danger' if category == 'error' else category }}"
+                         role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">{{ message }}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                                    data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    {% else %}
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            {% for category, message in messages %}
+            <div class="toast show align-items-center text-bg-{{ 'danger' if category == 'error' else category }}"
+                 role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">{{ message }}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block public_content %}{% endblock %}
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-hide toasts after 5 seconds
+        document.querySelectorAll('.toast').forEach(toast => {
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

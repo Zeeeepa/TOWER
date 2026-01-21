@@ -1,0 +1,66 @@
+---
+title: "TestDriver CLI Flags"
+sidebarTitle: "Flags"
+description: "Learn about the TestDriver CLI, its commands, and how to use it effectively."
+icon: "flag"
+---
+
+The `testdriverai` CLI is the primary interface for running, managing, and debugging TestDriver scripts. It provides commands to execute tests, validate configurations, and interact with the TestDriver framework.
+
+## Usage
+
+```bash
+npx testdriverai@latest <command> [options]
+```
+
+## Available commands
+
+|         Command          | Description                                                  |
+| :----------------------: | :----------------------------------------------------------- |
+|  [`run`](/commands/run)  | Executes a TestDriver test.                                  |
+| [`edit`](/commands/edit) | Launch interactive mode.                                     |
+| [`help`](/commands/help) | Displays help information for the CLI or a specific command. |
+
+## Available Flags
+
+| Flag                | Description                                                                                |
+| :------------------ | :----------------------------------------------------------------------------------------- |
+| `--heal`            | Launch exploratory mode and attemp to recover if an error or failing state is encountered. |
+| `--write`           | Ovewrite test file with new commands resulting from agentic testing                        |
+| `--new`             | Create a new sandbox environment for the test run.                                         |
+| `--summary=<value>` | Output file where AI summary should be saved.                                              |
+| `--junit=<value>`   | Output file where junit report should be saved.                                            |
+
+## Example usage
+
+### Running a test script
+
+```bash
+npx testdriverai@latest run path/to/testdriver.yaml
+```
+
+This command runs the specified TestDriver script, executing all steps defined in the file.
+
+### Initializing a new project
+
+```bash
+npx testdriverai@latest init
+```
+
+This command sets up a new TestDriver project in the current directory, creating the necessary folder structure and configuration files.
+
+### Getting help
+
+```bash
+npx testdriverai@latest help
+```
+
+This command displays general help information. To get help for a specific command, use:
+
+```bash
+npx testdriverai@latest help <command>
+```
+
+## Protips
+
+- Combine [`run`](/commands/run) and `--headless` with CI/CD pipelines to automate test execution.

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "owl-browser": {
+      "command": "node",
+      "args": [
+        "/Users/ahstanin/GitHub/Olib-AI/olib-browser/src/mcp-server.cjs"
+      ]
+    }
+  }
+}

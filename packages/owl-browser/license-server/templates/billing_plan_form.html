@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Plan' if is_edit else 'New Billing Plan' }} - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('billing_plans_list') }}">Billing Plans</a></li>
+            <li class="breadcrumb-item active">{{ 'Edit Plan' if is_edit else 'New Plan' }}</li>
+        </ol>
+    </nav>
+    <h2 class="glow-text mb-1">{{ 'Edit Billing Plan' if is_edit else 'New Billing Plan' }}</h2>
+    <p class="text-muted mb-0">{{ 'Update plan details' if is_edit else 'Create a new subscription plan' }}</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row mb-4">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Plan Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" required
+                                   placeholder="e.g., Professional Monthly"
+                                   value="{{ form_data.get('name', '') }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
+                                       {{ 'checked' if form_data.get('is_active', True) }}>
+                                <label class="form-check-label" for="is_active">Active</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="2"
+                                  placeholder="Brief description of this plan">{{ form_data.get('description', '') }}</textarea>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Price <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="price" class="form-control" required
+                                       step="0.01" min="0"
+                                       value="{{ form_data.get('price', '0.00') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Currency</label>
+                            <select name="currency" class="form-select">
+                                <option value="USD" {{ 'selected' if form_data.get('currency') == 'USD' }}>USD</option>
+                                <option value="EUR" {{ 'selected' if form_data.get('currency') == 'EUR' }}>EUR</option>
+                                <option value="GBP" {{ 'selected' if form_data.get('currency') == 'GBP' }}>GBP</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Billing Period</label>
+                            <select name="billing_period" class="form-select">
+                                <option value="monthly" {{ 'selected' if form_data.get('billing_period') == 'monthly' }}>Monthly</option>
+                                <option value="quarterly" {{ 'selected' if form_data.get('billing_period') == 'quarterly' }}>Quarterly</option>
+                                <option value="yearly" {{ 'selected' if form_data.get('billing_period') == 'yearly' }}>Yearly</option>
+                                <option value="lifetime" {{ 'selected' if form_data.get('billing_period') == 'lifetime' }}>Lifetime</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">License Type</label>
+                            <select name="license_type" class="form-select">
+                                {% for type_id, type_name in license_types.items() %}
+                                <option value="{{ type_id }}" {{ 'selected' if form_data.get('license_type')|int == type_id }}>
+                                    {{ type_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Max Seats</label>
+                            <input type="number" name="max_seats" class="form-control"
+                                   min="1" value="{{ form_data.get('max_seats', 1) }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Features</label>
+                        <textarea name="features" class="form-control" rows="3"
+                                  placeholder="Comma-separated list of features (e.g., Priority support, Advanced analytics, Custom integrations)">{{ form_data.get('features', '') }}</textarea>
+                        <div class="form-text">Enter features separated by commas</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>{{ 'Update Plan' if is_edit else 'Create Plan' }}
+                        </button>
+                        <a href="{{ url_for('billing_plans_list') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Plan Preview</h6>
+            </div>
+            <div class="card-body text-center">
+                <div class="display-5 fw-bold mb-2" id="pricePreview">$0.00</div>
+                <div class="text-muted mb-3" id="periodPreview">per month</div>
+                <hr>
+                <p class="small text-muted mb-0">
+                    This is how the plan will appear to customers
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const priceInput = document.querySelector('input[name="price"]');
+    const currencySelect = document.querySelector('select[name="currency"]');
+    const periodSelect = document.querySelector('select[name="billing_period"]');
+    const pricePreview = document.getElementById('pricePreview');
+    const periodPreview = document.getElementById('periodPreview');
+
+    const currencySymbols = { USD: '$', EUR: '?', GBP: '?' };
+    const periodLabels = { monthly: 'per month', quarterly: 'per quarter', yearly: 'per year', lifetime: 'one-time' };
+
+    function updatePreview() {
+        const symbol = currencySymbols[currencySelect.value] || '$';
+        const price = parseFloat(priceInput.value) || 0;
+        pricePreview.textContent = symbol + price.toFixed(2);
+        periodPreview.textContent = periodLabels[periodSelect.value] || 'per month';
+    }
+
+    priceInput.addEventListener('input', updatePreview);
+    currencySelect.addEventListener('change', updatePreview);
+    periodSelect.addEventListener('change', updatePreview);
+
+    updatePreview();
+});
+</script>
+{% endblock %}

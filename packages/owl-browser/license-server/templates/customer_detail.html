@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }} - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('customers_list') }}">Customers</a></li>
+            <li class="breadcrumb-item active">{{ customer.name }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <!-- Customer Info -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>Customer Details</h5>
+                <a href="{{ url_for('customer_edit', customer_id=customer.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil"></i>
+                </a>
+            </div>
+            <div class="card-body">
+                <h4 class="mb-1">{{ customer.name }}</h4>
+                {% if customer.company %}
+                <p class="text-muted mb-3">{{ customer.company }}</p>
+                {% endif %}
+
+                <div class="mb-3">
+                    <span class="status-dot {{ customer.status }}"></span>
+                    <span class="text-capitalize">{{ customer.status }}</span>
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Email</small>
+                    <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>
+                </div>
+
+                {% if customer.phone %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Phone</small>
+                    {{ customer.phone }}
+                </div>
+                {% endif %}
+
+                {% if customer.address_line1 %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Address</small>
+                    {{ customer.address_line1 }}<br>
+                    {% if customer.address_line2 %}{{ customer.address_line2 }}<br>{% endif %}
+                    {{ customer.city }}{% if customer.state %}, {{ customer.state }}{% endif %} {{ customer.postal_code }}<br>
+                    {{ customer.country }}
+                </div>
+                {% endif %}
+
+                {% if customer.tax_id %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Tax ID</small>
+                    {{ customer.tax_id }}
+                </div>
+                {% endif %}
+
+                <hr>
+
+                <div class="mb-2">
+                    <small class="text-muted d-block">Created</small>
+                    {{ customer.created_at|datetime }}
+                </div>
+                {% if customer.updated_at %}
+                <div>
+                    <small class="text-muted d-block">Last Updated</small>
+                    {{ customer.updated_at|datetime }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{{ url_for('invoice_new', customer_id=customer.id) }}" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-receipt me-1"></i>Create Invoice
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <!-- Licenses -->
+        <div class="card mb-4">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-key-fill me-2"></i>Licenses</h5>
+                <span class="badge bg-primary">{{ licenses|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if licenses %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>License ID</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Expiry</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for license in licenses %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('license_detail', license_id=license.id) }}" class="text-decoration-none">
+                                        <code class="text-primary">{{ license.id[:12] }}...</code>
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge badge-license-type badge-{{ license_types[license.license_type]|lower }}">
+                                        {{ license_types[license.license_type] }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-dot {{ license.status }}"></span>
+                                    {{ license.status|capitalize }}
+                                </td>
+                                <td class="text-muted small">
+                                    {{ license.expiry_date|datetime if license.expiry_date else 'Perpetual' }}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('license_detail', license_id=license.id) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-key display-4 d-block mb-2 opacity-50"></i>
+                    No licenses for this customer
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Invoices -->
+        <div class="card mb-4">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Invoices</h5>
+                <span class="badge bg-secondary">{{ invoices|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if invoices %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in invoices %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('invoice_detail', invoice_id=invoice.id) }}" class="text-decoration-none">
+                                        {{ invoice.invoice_number }}
+                                    </a>
+                                </td>
+                                <td class="text-muted small">{{ invoice.created_at|datetime }}</td>
+                                <td>{{ invoice.currency }} {{ '%.2f'|format(invoice.total) }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if invoice.status == 'paid' else 'warning' if invoice.status == 'pending' else 'danger' }}">
+                                        {{ invoice.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('invoice_detail', invoice_id=invoice.id) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-receipt display-4 d-block mb-2 opacity-50"></i>
+                    No invoices for this customer
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="card mb-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i>Payment Methods</h5>
+            </div>
+            <div class="card-body">
+                {% if payment_methods %}
+                <div class="list-group list-group-flush">
+                    {% for method in payment_methods %}
+                    <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-credit-card-2-front me-2"></i>
+                            {{ method.type|capitalize }} ending in {{ method.last_four }}
+                            {% if method.is_default %}
+                            <span class="badge bg-primary ms-2">Default</span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Expires {{ method.exp_month }}/{{ method.exp_year }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-credit-card display-4 d-block mb-2 opacity-50"></i>
+                    No payment methods on file
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Activity</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if activity %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in activity %}
+                            <tr>
+                                <td>{{ log.activity_type }}</td>
+                                <td class="text-muted small">{{ log.description or '-' }}</td>
+                                <td class="text-muted small">{{ log.created_at|datetime }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-clock-history display-4 d-block mb-2 opacity-50"></i>
+                    No activity recorded
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if customer.notes %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Internal Notes</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0 text-muted">{{ customer.notes }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

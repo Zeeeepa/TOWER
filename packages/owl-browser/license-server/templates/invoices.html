@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Invoices - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="glow-text mb-1">Invoices</h2>
+        <p class="text-muted mb-0">Manage customer invoices</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="pending" {{ 'selected' if status == 'pending' }}>Pending</option>
+                    <option value="paid" {{ 'selected' if status == 'paid' }}>Paid</option>
+                    <option value="overdue" {{ 'selected' if status == 'overdue' }}>Overdue</option>
+                    <option value="voided" {{ 'selected' if status == 'voided' }}>Voided</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel me-1"></i>Filter
+                </button>
+                {% if status %}
+                <a href="{{ url_for('invoices_list') }}" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Invoices Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Due Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('invoice_detail', invoice_id=invoice.id) }}" class="text-decoration-none fw-bold">
+                                {{ invoice.invoice_number }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if invoice.customer_id %}
+                            <a href="{{ url_for('customer_detail', customer_id=invoice.customer_id) }}" class="text-decoration-none">
+                                {{ invoice.customer_name or 'Unknown' }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ invoice.created_at|datetime }}</td>
+                        <td class="text-muted small">{{ invoice.due_date|datetime if invoice.due_date else '-' }}</td>
+                        <td class="fw-bold">{{ invoice.currency }} {{ '%.2f'|format(invoice.total) }}</td>
+                        <td>
+                            {% if invoice.status == 'paid' %}
+                            <span class="badge bg-success">Paid</span>
+                            {% elif invoice.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif invoice.status == 'overdue' %}
+                            <span class="badge bg-danger">Overdue</span>
+                            {% elif invoice.status == 'voided' %}
+                            <span class="badge bg-secondary">Voided</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ invoice.status|capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                        type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('invoice_detail', invoice_id=invoice.id) }}">
+                                            <i class="bi bi-eye me-2"></i>View Details
+                                        </a>
+                                    </li>
+                                    {% if invoice.status == 'pending' %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-success" href="#"
+                                           onclick="markPaid('{{ invoice.id }}')">
+                                            <i class="bi bi-check-circle me-2"></i>Mark as Paid
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#"
+                                           onclick="voidInvoice('{{ invoice.id }}')">
+                                            <i class="bi bi-x-circle me-2"></i>Void Invoice
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-receipt display-4 d-block mb-3"></i>
+                            No invoices found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if total_pages > 1 %}
+    <div class="card-footer bg-transparent">
+        <nav>
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {{ 'disabled' if page == 1 }}">
+                    <a class="page-link" href="?page={{ page - 1 }}&status={{ status }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {{ 'active' if p == page }}">
+                    <a class="page-link" href="?page={{ p }}&status={{ status }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if page == total_pages }}">
+                    <a class="page-link" href="?page={{ page + 1 }}&status={{ status }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Mark Paid Modal -->
+<div class="modal fade" id="paidModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <form id="paidForm" method="POST">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-success">
+                        <i class="bi bi-check-circle me-2"></i>Mark as Paid
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select name="payment_method" class="form-select">
+                            <option value="manual">Manual / Cash</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Reference (optional)</label>
+                        <input type="text" name="payment_ref" class="form-control"
+                               placeholder="Transaction ID or reference">
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Mark as Paid</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Void Modal -->
+<div class="modal fade" id="voidModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <form id="voidForm" method="POST">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-x-circle me-2"></i>Void Invoice
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to void this invoice? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Void Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function markPaid(invoiceId) {
+    document.getElementById('paidForm').action = `/invoices/${invoiceId}/mark-paid`;
+    new bootstrap.Modal(document.getElementById('paidModal')).show();
+}
+
+function voidInvoice(invoiceId) {
+    document.getElementById('voidForm').action = `/invoices/${invoiceId}/void`;
+    new bootstrap.Modal(document.getElementById('voidModal')).show();
+}
+</script>
+{% endblock %}

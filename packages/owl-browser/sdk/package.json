@@ -1,0 +1,46 @@
+{
+  "name": "@olib-ai/owl-browser-sdk",
+  "version": "1.2.3",
+  "description": "AI-first browser automation SDK for Node.js/TypeScript - Built by Olib AI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "browser",
+    "automation",
+    "ai",
+    "selenium",
+    "puppeteer",
+    "playwright",
+    "web-scraping",
+    "testing",
+    "chromium",
+    "owl-browser"
+  ],
+  "author": "Olib AI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Olib-AI/owl-browser.git",
+    "directory": "sdk"
+  },
+  "homepage": "https://www.owlbrowser.net",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

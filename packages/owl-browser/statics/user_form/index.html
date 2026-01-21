@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - Owl Services</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="form-wrapper">
+      <!-- Header -->
+      <div class="header">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="#4F46E5"/>
+            <path d="M16 8C11.5817 8 8 11.5817 8 16C8 20.4183 11.5817 24 16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8ZM16 10C19.3137 10 22 12.6863 22 16C22 19.3137 19.3137 22 16 22C12.6863 22 10 19.3137 10 16C10 12.6863 12.6863 10 16 10Z" fill="white"/>
+          </svg>
+          <span class="logo-text">Owl</span>
+        </div>
+        <h1>Create your account</h1>
+        <p class="subtitle">Join thousands of users already using Owl</p>
+      </div>
+
+      <!-- Form -->
+      <form id="registrationForm" class="form" novalidate>
+        <!-- Personal Information -->
+        <div class="form-section">
+          <h2 class="section-title">Personal Information</h2>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName" class="form-label">
+                First Name <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                class="form-input"
+                placeholder="John"
+                required
+                autocomplete="given-name"
+              >
+              <span class="error-message" id="firstName-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="lastName" class="form-label">
+                Last Name <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                class="form-input"
+                placeholder="Doe"
+                required
+                autocomplete="family-name"
+              >
+              <span class="error-message" id="lastName-error"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">
+              Email Address <span class="required">*</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="john.doe@example.com"
+              required
+              autocomplete="email"
+            >
+            <span class="error-message" id="email-error"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="phone" class="form-label">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              class="form-input"
+              placeholder="+1 (555) 123-4567"
+              autocomplete="tel"
+            >
+            <span class="error-message" id="phone-error"></span>
+          </div>
+        </div>
+
+        <!-- Account Security -->
+        <div class="form-section">
+          <h2 class="section-title">Account Security</h2>
+
+          <div class="form-group">
+            <label for="username" class="form-label">
+              Username <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              class="form-input"
+              placeholder="johndoe123"
+              required
+              autocomplete="username"
+            >
+            <span class="form-hint">Must be 4-20 characters, letters and numbers only</span>
+            <span class="error-message" id="username-error"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">
+              Password <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-input"
+                placeholder="Enter your password"
+                required
+                autocomplete="new-password"
+              >
+              <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                <svg class="eye-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+            <div class="password-strength" id="passwordStrength">
+              <div class="strength-bar">
+                <div class="strength-fill" id="strengthFill"></div>
+              </div>
+              <span class="strength-text" id="strengthText">Password strength</span>
+            </div>
+            <span class="error-message" id="password-error"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword" class="form-label">
+              Confirm Password <span class="required">*</span>
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              class="form-input"
+              placeholder="Confirm your password"
+              required
+              autocomplete="new-password"
+            >
+            <span class="error-message" id="confirmPassword-error"></span>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="form-section">
+          <h2 class="section-title">Preferences</h2>
+
+          <div class="form-group">
+            <label for="country" class="form-label">
+              Country <span class="required">*</span>
+            </label>
+            <select id="country" name="country" class="form-select" required>
+              <option value="">Select your country</option>
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+              <option value="GB">United Kingdom</option>
+              <option value="AU">Australia</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+              <option value="JP">Japan</option>
+              <option value="CN">China</option>
+              <option value="IN">India</option>
+              <option value="BR">Brazil</option>
+            </select>
+            <span class="error-message" id="country-error"></span>
+          </div>
+
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="newsletter" id="newsletter" class="checkbox">
+              <span class="checkbox-text">Send me product updates and announcements</span>
+            </label>
+          </div>
+
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="terms" id="terms" class="checkbox" required>
+              <span class="checkbox-text">
+                I agree to the <a href="#" class="link">Terms of Service</a> and
+                <a href="#" class="link">Privacy Policy</a> <span class="required">*</span>
+              </span>
+            </label>
+            <span class="error-message" id="terms-error"></span>
+          </div>
+        </div>
+
+        <!-- CAPTCHA -->
+        <div class="form-section">
+          <h2 class="section-title">Security Verification</h2>
+
+          <div class="captcha-container" id="captchaContainer">
+            <div class="captcha-header">
+              <div class="captcha-checkbox">
+                <input type="checkbox" id="captchaCheck" class="captcha-checkbox-input">
+                <label for="captchaCheck" class="captcha-checkbox-label">
+                  <span class="checkmark"></span>
+                  <span class="captcha-text">I'm not a robot</span>
+                </label>
+              </div>
+              <div class="captcha-logo">
+                <div class="captcha-logo-text">SecureCheck</div>
+                <div class="captcha-links">
+                  <a href="#" class="captcha-link">Privacy</a>
+                  <span class="separator">-</span>
+                  <a href="#" class="captcha-link">Terms</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Image CAPTCHA Challenge (hidden initially) -->
+            <div class="captcha-challenge" id="captchaChallenge">
+              <div class="challenge-header">
+                <h3 class="challenge-title">Select all squares with <strong id="challengeTarget">cars</strong></h3>
+                <p class="challenge-subtitle">If there are none, click skip</p>
+              </div>
+
+              <div class="image-grid" id="imageGrid">
+                <!-- Will be populated by JavaScript -->
+              </div>
+
+              <div class="challenge-footer">
+                <button type="button" class="btn-secondary" id="skipBtn">Skip</button>
+                <button type="button" class="btn-primary" id="verifyBtn">Verify</button>
+              </div>
+            </div>
+          </div>
+          <span class="error-message" id="captcha-error"></span>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <span class="btn-text">Create Account</span>
+            <svg class="btn-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="form-footer">
+          <p>Already have an account? <a href="#" class="link">Sign in</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal" id="successModal">
+    <div class="modal-content">
+      <div class="modal-icon success">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" fill="#10B981"/>
+          <path d="M14 24L20 30L34 16" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="modal-title">Account Created Successfully!</h2>
+      <p class="modal-text">Welcome to Owl. Please check your email to verify your account.</p>
+      <button type="button" class="btn-primary" onclick="closeModal()">Get Started</button>
+    </div>
+  </div>
+
+  <script src="js/form-validation.js"></script>
+  <script src="js/captcha.js"></script>
+</body>
+</html>

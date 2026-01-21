@@ -1,0 +1,687 @@
+{% extends "base.html" %}
+
+{% block title %}License {{ license.id[:8] }} - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('licenses_list') }}" class="text-muted text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i>Back to Licenses
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Main Info -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <span class="badge badge-license-type badge-{{ license_types[license.license_type]|lower }} me-2">
+                        {{ license_types[license.license_type] }}
+                    </span>
+                    License Details
+                </h4>
+                <span class="status-dot {{ license.status }} me-1"></span>
+                <span class="text-{{ license.status|status_badge }}">{{ license.status|capitalize }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">License ID</h6>
+                        <code class="fs-6 d-block p-2 bg-dark rounded">{{ license.id }}</code>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Issuer</h6>
+                        <p class="mb-0">{{ license.issuer or 'System' }}</p>
+                    </div>
+
+                    <div class="col-12"><hr class="border-secondary"></div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-person me-1"></i>Licensee
+                        </h6>
+                        <p class="mb-1 fs-5">{{ license.name }}</p>
+                        <p class="mb-1 text-muted">{{ license.email }}</p>
+                        {% if license.organization %}
+                        <p class="mb-0 text-muted">{{ license.organization }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-calendar me-1"></i>Dates
+                        </h6>
+                        <p class="mb-1">
+                            <span class="text-muted">Issued:</span>
+                            {{ license.issue_date|datetime }}
+                        </p>
+                        <p class="mb-0">
+                            <span class="text-muted">Expires:</span>
+                            {% if license.expiry_date %}
+                            {{ license.expiry_date|datetime }}
+                            {% else %}
+                            <span class="badge bg-success">Perpetual</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Customer and Plan Info -->
+                    {% if license.customer_id or license.plan_id %}
+                    <div class="col-12"><hr class="border-secondary"></div>
+                    {% endif %}
+
+                    {% if license.customer_id %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-building me-1"></i>Linked Customer
+                        </h6>
+                        <p class="mb-1">
+                            <a href="{{ url_for('customer_detail', customer_id=license.customer_id) }}" class="text-decoration-none">
+                                {{ license.customer_name or 'Unknown' }}
+                            </a>
+                        </p>
+                        {% if license.customer_company %}
+                        <p class="mb-0 text-muted small">{{ license.customer_company }}</p>
+                        {% endif %}
+                        {% if license.customer_email and license.customer_email != license.email %}
+                        <p class="mb-0 text-muted small">{{ license.customer_email }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if license.plan_id %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-credit-card me-1"></i>Billing Plan
+                        </h6>
+                        <p class="mb-1">
+                            <span class="badge bg-info">{{ license.plan_name or 'Unknown Plan' }}</span>
+                        </p>
+                        {% if license.plan_price %}
+                        <p class="mb-0 text-muted small">${{ '%.2f'|format(license.plan_price) }}/month</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="col-12"><hr class="border-secondary"></div>
+
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-laptop me-1"></i>Max Seats
+                        </h6>
+                        <p class="fs-4 mb-0">{{ license.max_seats }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-cpu me-1"></i>Hardware Bound
+                        </h6>
+                        <p class="mb-0">
+                            {% if license.hardware_bound %}
+                            <span class="badge bg-warning">Yes</span>
+                            {% else %}
+                            <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-flag me-1"></i>Features
+                        </h6>
+                        <p class="mb-0">
+                            <code>{{ license.feature_flags or 0 }}</code>
+                        </p>
+                    </div>
+
+                    {% if license.notes %}
+                    <div class="col-12">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-sticky me-1"></i>Notes
+                        </h6>
+                        <p class="mb-0 bg-dark p-3 rounded">{{ license.notes }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Version 2 Extended Metadata -->
+                    {% if license.license_version and license.license_version >= 2 %}
+                    <div class="col-12"><hr class="border-secondary"></div>
+                    <div class="col-12">
+                        <h6 class="text-muted mb-3">
+                            <i class="bi bi-sliders me-1"></i>Extended Metadata (v{{ license.license_version }})
+                        </h6>
+                        <div class="row g-3">
+                            <!-- Version Control -->
+                            {% if license.min_browser_version or license.max_browser_version %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">Browser Version Range</small>
+                                <span class="badge bg-secondary">
+                                    {{ license.min_browser_version or '*' }} - {{ license.max_browser_version or '*' }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Geographic -->
+                            {% if license.allowed_regions %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">Allowed Regions</small>
+                                {% for region in license.allowed_regions.split(',') %}
+                                <span class="badge bg-info me-1">{{ region.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% if license.export_control %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">Export Control</small>
+                                <span class="badge bg-warning text-dark">{{ license.export_control }}</span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Business Metadata -->
+                            {% if license.order_id or license.invoice_id or license.reseller_id %}
+                            <div class="col-12 mt-2">
+                                <small class="text-muted d-block mb-1">Business References</small>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% if license.order_id %}
+                                    <span class="badge bg-dark border border-secondary">
+                                        <i class="bi bi-cart me-1"></i>Order: {{ license.order_id }}
+                                    </span>
+                                    {% endif %}
+                                    {% if license.invoice_id %}
+                                    <span class="badge bg-dark border border-secondary">
+                                        <i class="bi bi-receipt me-1"></i>Invoice: {{ license.invoice_id }}
+                                    </span>
+                                    {% endif %}
+                                    {% if license.reseller_id %}
+                                    <span class="badge bg-dark border border-secondary">
+                                        <i class="bi bi-shop me-1"></i>Reseller: {{ license.reseller_id }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Support & Maintenance -->
+                            {% if license.support_tier and license.support_tier > 0 %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">Support Tier</small>
+                                {% set support_tiers = {1: 'Basic', 2: 'Standard', 3: 'Premium', 4: 'Enterprise'} %}
+                                {% set tier_colors = {1: 'secondary', 2: 'info', 3: 'primary', 4: 'success'} %}
+                                <span class="badge bg-{{ tier_colors.get(license.support_tier, 'secondary') }}">
+                                    <i class="bi bi-headset me-1"></i>{{ support_tiers.get(license.support_tier, 'Unknown') }}
+                                </span>
+                                {% if license.support_expiry_date %}
+                                <small class="text-muted ms-2">until {{ license.support_expiry_date|datetime }}</small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if license.maintenance_included %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">Maintenance</small>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-gear me-1"></i>Included
+                                </span>
+                                {% if license.maintenance_expiry_date %}
+                                <small class="text-muted ms-2">until {{ license.maintenance_expiry_date|datetime }}</small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Usage Stats -->
+                            {% if license.total_activations and license.total_activations > 0 %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">Total Activations</small>
+                                <span class="fs-5">{{ license.total_activations }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if license.last_device_name %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">Last Device</small>
+                                <span>{{ license.last_device_name }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if license.issued_ip %}
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">Issued From IP</small>
+                                <code class="small">{{ license.issued_ip }}</code>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription Info (if applicable) -->
+        {% if subscription %}
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-repeat text-info me-2"></i>Subscription Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Status</h6>
+                        <span class="badge bg-{{ 'success' if subscription.status == 'active' else 'danger' }} fs-6">
+                            {{ subscription.status|capitalize }}
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Grace Period</h6>
+                        <p class="mb-0">{{ subscription.grace_period_days }} days</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Activation</h6>
+                        <p class="mb-0">{{ subscription.activation_date|datetime or 'Not activated' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Last Check</h6>
+                        <p class="mb-0">{{ subscription.last_check_date|datetime or 'Never' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Next Check</h6>
+                        <p class="mb-0">{{ subscription.next_check_date|datetime or 'Not scheduled' }}</p>
+                    </div>
+                    {% if subscription.canceled_at %}
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Canceled</h6>
+                        <p class="mb-0 text-danger">{{ subscription.canceled_at|datetime }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Active Seats -->
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-pc-display-horizontal me-2"></i>Active Seats
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-{{ 'success' if active_seat_count < license.max_seats else 'danger' }} fs-6">
+                        {{ active_seat_count }} / {{ license.max_seats }}
+                    </span>
+                    {% if inactive_seat_count|default(0) > 0 %}
+                    <form action="{{ url_for('clear_license_inactive_seats', license_id=license.id) }}" method="POST" class="d-inline"
+                          onsubmit="return confirm('Delete {{ inactive_seat_count }} inactive seat record(s)?');">
+                        <button type="submit" class="btn btn-outline-warning btn-sm" title="Clear inactive seats">
+                            <i class="bi bi-trash"></i> {{ inactive_seat_count }}
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>First Activated</th>
+                                <th>Last Seen</th>
+                                <th>IP Address</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for seat in seats %}
+                            <tr class="{{ 'text-muted' if not seat.is_active else '' }}">
+                                <td title="{{ seat.hardware_fingerprint }}">
+                                    {% if seat.device_name %}
+                                    <div>{{ seat.device_name }}</div>
+                                    {% else %}
+                                    <div class="text-muted">Unknown device</div>
+                                    {% endif %}
+                                    {% if seat.os_info %}
+                                    <small class="text-muted">{{ seat.os_info }}</small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">{{ seat.first_activated_at|datetime }}</td>
+                                <td class="text-muted small">{{ seat.last_seen_at|datetime }}</td>
+                                <td class="text-muted small">{{ seat.ip_address or '-' }}</td>
+                                <td>
+                                    {% if seat.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Deactivated</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if seat.is_active %}
+                                    <form action="{{ url_for('deactivate_seat', license_id=license.id, hardware_fingerprint=seat.hardware_fingerprint) }}"
+                                          method="POST" class="d-inline"
+                                          onsubmit="return confirm('Deactivate this seat?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted small">{{ seat.deactivated_at|datetime }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    No seats activated yet
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activation Logs -->
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-activity me-2"></i>Activation History
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    {% set ns = namespace(tampering_count=0) %}
+                    {% for log in activation_logs %}
+                        {% if log.action and log.action.startswith('tampering_') %}
+                            {% set ns.tampering_count = ns.tampering_count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if ns.tampering_count > 0 %}
+                    <span class="badge bg-danger">
+                        <i class="bi bi-exclamation-triangle me-1"></i>{{ ns.tampering_count }} tampering event{{ 's' if ns.tampering_count > 1 else '' }}
+                    </span>
+                    {% endif %}
+                    {% if activation_log_count|default(0) > 0 %}
+                    <form action="{{ url_for('clear_license_activation_logs', license_id=license.id) }}" method="POST" class="d-inline"
+                          onsubmit="return confirm('Delete all {{ activation_log_count }} activation log(s) for this license?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Clear activation logs">
+                            <i class="bi bi-trash"></i> {{ activation_log_count }}
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>Hardware</th>
+                                <th>IP</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in activation_logs %}
+                            {% set is_tampering = log.action.startswith('tampering_') %}
+                            <tr class="{{ 'table-danger' if is_tampering else '' }}">
+                                <td class="text-muted small">{{ log.created_at|datetime }}</td>
+                                <td>
+                                    {% if is_tampering %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-shield-exclamation me-1"></i>
+                                        {% if log.action == 'tampering_debugger_detected' %}
+                                        Debugger Detected
+                                        {% elif log.action == 'tampering_code_modified' %}
+                                        Code Modified
+                                        {% elif log.action == 'tampering_clock_manipulation' %}
+                                        Clock Manipulation
+                                        {% elif log.action == 'tampering_signature_invalid' %}
+                                        Invalid Signature
+                                        {% elif log.action == 'tampering_hardware_mismatch' %}
+                                        Hardware Mismatch
+                                        {% elif log.action == 'tampering_state_corrupted' %}
+                                        State Corrupted
+                                        {% elif log.action == 'tampering_license_revoked' %}
+                                        License Revoked
+                                        {% else %}
+                                        Tampering Detected
+                                        {% endif %}
+                                    </span>
+                                    {% elif log.action == 'activation' %}
+                                    <span class="badge bg-primary">Activation</span>
+                                    {% elif log.action == 'deactivation' %}
+                                    <span class="badge bg-secondary">Deactivation</span>
+                                    {% elif log.action == 'subscription_check' %}
+                                    <span class="badge bg-info">Subscription Check</span>
+                                    {% elif log.action == 'daily_check' %}
+                                    <span class="badge bg-info">Daily Check</span>
+                                    {% elif log.action == 'revocation' %}
+                                    <span class="badge bg-warning text-dark">Revoked</span>
+                                    {% elif log.action == 'reactivation' %}
+                                    <span class="badge bg-success">Reactivated</span>
+                                    {% else %}
+                                    {{ log.action }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.hardware_fingerprint %}
+                                    <code class="small">{{ log.hardware_fingerprint[:16] }}...</code>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">{{ log.ip_address or '-' }}</td>
+                                <td>
+                                    {% if is_tampering %}
+                                    <span class="badge bg-danger">Alert</span>
+                                    {% elif log.success %}
+                                    <span class="badge bg-success">Success</span>
+                                    {% else %}
+                                    <span class="badge bg-danger" title="{{ log.error_message }}">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td style="max-width: 300px;">
+                                    {% if log.error_message %}
+                                    <small class="{{ 'text-warning-emphasis' if is_tampering else 'text-muted' }}"
+                                           title="{{ log.error_message }}"
+                                           style="word-break: break-word; display: block;">
+                                        {{ log.error_message[:80] }}{{ '...' if log.error_message|length > 80 else '' }}
+                                    </small>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    No activation logs yet
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning me-2"></i>Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('license_download', license_id=license.id) }}"
+                       class="btn btn-primary">
+                        <i class="bi bi-download me-2"></i>Download License File
+                    </a>
+
+                    <form action="{{ url_for('license_reissue', license_id=license.id) }}" method="POST"
+                          onsubmit="return confirm('Regenerate the license file with the current format (v2)?\\n\\nThis will create a new .olic file with the updated license generator.');">
+                        <button type="submit" class="btn btn-outline-success w-100">
+                            <i class="bi bi-arrow-repeat me-2"></i>Reissue License File
+                        </button>
+                    </form>
+
+                    <button type="button" class="btn btn-outline-info"
+                            onclick="verifyLicense('{{ license.id }}')">
+                        <i class="bi bi-shield-check me-2"></i>Verify License
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="copyToClipboard('{{ license.id }}')">
+                        <i class="bi bi-clipboard me-2"></i>Copy License ID
+                    </button>
+
+                    <hr>
+
+                    {% if license.status == 'active' %}
+                    <button type="button" class="btn btn-outline-danger"
+                            data-bs-toggle="modal" data-bs-target="#revokeModal">
+                        <i class="bi bi-x-circle me-2"></i>Revoke License
+                    </button>
+                    {% elif license.status in ['revoked', 'canceled'] %}
+                    <form action="{{ url_for('license_reactivate', license_id=license.id) }}" method="POST">
+                        <button type="submit" class="btn btn-outline-success w-100">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Reactivate License
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if subscription and subscription.status == 'active' %}
+                    <form action="{{ url_for('subscription_cancel', license_id=license.id) }}" method="POST"
+                          onsubmit="return confirm('Cancel this subscription?');">
+                        <button type="submit" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-pause-circle me-2"></i>Cancel Subscription
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Result -->
+        <div id="verificationResult" class="card mt-4" style="display: none;">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-check me-2"></i>Verification Result
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="verificationContent"></div>
+            </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Metadata
+                </h5>
+            </div>
+            <div class="card-body small">
+                <p class="mb-2">
+                    <span class="text-muted">Created:</span><br>
+                    {{ license.created_at|datetime }}
+                </p>
+                <p class="mb-2">
+                    <span class="text-muted">Updated:</span><br>
+                    {{ license.updated_at|datetime }}
+                </p>
+                {% if license.file_path %}
+                <p class="mb-0">
+                    <span class="text-muted">File:</span><br>
+                    <code class="small text-break">{{ license.file_path }}</code>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Revoke Modal -->
+<div class="modal fade" id="revokeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <form action="{{ url_for('license_revoke', license_id=license.id) }}" method="POST">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Revoke License
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to revoke this license?</p>
+                    <p class="text-muted small">
+                        The license will be marked as revoked and will no longer be valid.
+                        This action can be reversed by reactivating the license.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <textarea name="reason" class="form-control" rows="2"
+                                  placeholder="Enter reason for revocation"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Revoke License</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('License ID copied to clipboard!');
+    });
+}
+
+function verifyLicense(licenseId) {
+    const resultDiv = document.getElementById('verificationResult');
+    const contentDiv = document.getElementById('verificationContent');
+
+    contentDiv.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
+    resultDiv.style.display = 'block';
+
+    fetch(`/api/licenses/${licenseId}/verify`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.valid) {
+                contentDiv.innerHTML = `
+                    <div class="alert alert-success mb-0">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <strong>License is valid!</strong>
+                    </div>
+                `;
+            } else {
+                contentDiv.innerHTML = `
+                    <div class="alert alert-danger mb-0">
+                        <i class="bi bi-x-circle me-2"></i>
+                        <strong>Verification failed</strong><br>
+                        <small>${data.error || 'Unknown error'}</small>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            contentDiv.innerHTML = `
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Error</strong><br>
+                    <small>${error.message}</small>
+                </div>
+            `;
+        });
+}
+</script>
+{% endblock %}

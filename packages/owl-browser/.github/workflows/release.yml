@@ -1,0 +1,358 @@
+# =============================================================================
+# Owl Browser Release Workflow
+# =============================================================================
+# Triggered on version tags (v*)
+# Builds release artifacts for all platforms, creates GitHub release,
+# publishes Docker image with version tag, and publishes SDK to npm
+# =============================================================================
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build Release Artifacts
+  # ---------------------------------------------------------------------------
+  build-release:
+    name: Build Release (${{ matrix.os }}-${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos
+            arch: arm64
+            runner: macos-14
+          - os: macos
+            arch: x64
+            runner: macos-13
+          - os: ubuntu
+            arch: x64
+            runner: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos'
+        run: brew install cmake libmaxminddb sqlcipher curl
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake \
+            libmaxminddb-dev libsqlcipher-dev libssl-dev \
+            libcurl4-openssl-dev zlib1g-dev uuid-dev \
+            libgtk-3-dev librsvg2-dev libglib2.0-dev \
+            libnspr4-dev libnss3-dev libatk1.0-dev \
+            libatk-bridge2.0-dev libcups2-dev libdrm-dev \
+            libxkbcommon-dev libxcomposite-dev libxdamage-dev \
+            libxrandr-dev libgbm-dev libpango1.0-dev libasound2-dev
+
+      - name: Cache CEF
+        uses: actions/cache@v4
+        id: cef-cache
+        with:
+          path: third_party/cef_${{ matrix.os == 'macos' && 'macos' || 'linux' }}
+          key: cef-${{ matrix.os }}-${{ matrix.arch }}-${{ hashFiles('scripts/download-cef.cjs') }}
+
+      - name: Download CEF
+        if: steps.cef-cache.outputs.cache-hit != 'true'
+        run: npm run download:cef
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build all targets
+        run: npm run build:all
+        env:
+          OWL_NONCE_HMAC_SECRET: ${{ secrets.OWL_NONCE_HMAC_SECRET }}
+          OWL_VM_PROFILE_DB_PASS: ${{ secrets.OWL_VM_PROFILE_DB_PASS }}
+
+      - name: Build MCP standalone
+        run: npm run build:mcp
+
+      - name: Create release archive (macOS)
+        if: matrix.os == 'macos'
+        run: |
+          VERSION=${{ github.ref_name }}
+          ARCHIVE_NAME="owl-browser-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz"
+
+          # Create a staging directory
+          mkdir -p release-staging
+          cp -r build/Release/owl_browser.app release-staging/
+          cp build/Release/owl_http_server release-staging/ 2>/dev/null || true
+          cp dist/mcp-server-standalone.cjs release-staging/ 2>/dev/null || true
+
+          # Create tarball
+          tar -czvf "$ARCHIVE_NAME" -C release-staging .
+
+          echo "Created: $ARCHIVE_NAME"
+          ls -la "$ARCHIVE_NAME"
+
+      - name: Create release archive (Ubuntu)
+        if: matrix.os == 'ubuntu'
+        run: |
+          VERSION=${{ github.ref_name }}
+          ARCHIVE_NAME="owl-browser-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz"
+
+          # Create a staging directory
+          mkdir -p release-staging
+          cp build/owl_browser release-staging/
+          cp build/owl_http_server release-staging/ 2>/dev/null || true
+          cp build/*.so* release-staging/ 2>/dev/null || true
+          cp dist/mcp-server-standalone.cjs release-staging/ 2>/dev/null || true
+
+          # Create tarball
+          tar -czvf "$ARCHIVE_NAME" -C release-staging .
+
+          echo "Created: $ARCHIVE_NAME"
+          ls -la "$ARCHIVE_NAME"
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}-${{ matrix.arch }}
+          path: owl-browser-*.tar.gz
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Create GitHub Release
+  # ---------------------------------------------------------------------------
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build-release
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          pattern: release-*
+
+      - name: List artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find release-artifacts -type f -name "*.tar.gz"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/**/*.tar.gz
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
+          body: |
+            ## Owl Browser ${{ github.ref_name }}
+
+            ### Downloads
+
+            | Platform | Architecture | Download |
+            |----------|--------------|----------|
+            | macOS | ARM64 (M1/M2/M3) | `owl-browser-${{ github.ref_name }}-macos-arm64.tar.gz` |
+            | macOS | x64 (Intel) | `owl-browser-${{ github.ref_name }}-macos-x64.tar.gz` |
+            | Ubuntu | x64 (amd64) | `owl-browser-${{ github.ref_name }}-ubuntu-x64.tar.gz` |
+
+            ### Docker
+
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ```
+
+            ### SDK (npm)
+
+            ```bash
+            npm install @olib-ai/owl-browser-sdk@${{ github.ref_name }}
+            ```
+
+            ---
+            See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
+
+  # ---------------------------------------------------------------------------
+  # Publish Docker Image
+  # ---------------------------------------------------------------------------
+  publish-docker:
+    name: Publish Docker Image
+    runs-on: ubuntu-22.04
+    needs: build-release
+    permissions:
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Extracted version: $VERSION"
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}
+            ghcr.io/${{ github.repository }}:latest
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            OWL_NONCE_HMAC_SECRET=${{ secrets.OWL_NONCE_HMAC_SECRET }}
+            OWL_VM_PROFILE_DB_PASS=${{ secrets.OWL_VM_PROFILE_DB_PASS }}
+
+  # ---------------------------------------------------------------------------
+  # Publish SDK to npm
+  # ---------------------------------------------------------------------------
+  publish-sdk:
+    name: Publish SDK to npm
+    runs-on: ubuntu-latest
+    needs: create-release
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update SDK version
+        run: |
+          cd sdk
+          npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version --allow-same-version
+
+      - name: Install & Build SDK
+        run: |
+          cd sdk
+          npm ci
+          npm run build
+
+      - name: Publish to npm
+        run: cd sdk && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Publish Python SDK to PyPI
+  # ---------------------------------------------------------------------------
+  publish-python-sdk:
+    name: Publish Python SDK to PyPI
+    runs-on: ubuntu-latest
+    needs: create-release
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update Python SDK version
+        run: |
+          cd python-sdk
+          sed -i "s/^version = .*/version = \"${{ steps.version.outputs.VERSION }}\"/" pyproject.toml
+          echo "Updated Python SDK version to: ${{ steps.version.outputs.VERSION }}"
+          grep "^version" pyproject.toml
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build package
+        run: |
+          cd python-sdk
+          python -m build
+
+      - name: Verify package
+        run: |
+          cd python-sdk
+          twine check dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python-sdk/dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Notify on Completion
+  # ---------------------------------------------------------------------------
+  notify:
+    name: Release Notification
+    runs-on: ubuntu-latest
+    needs: [create-release, publish-docker, publish-sdk, publish-python-sdk]
+    if: always()
+    steps:
+      - name: Check release status
+        run: |
+          if [ "${{ needs.create-release.result }}" == "success" ] && \
+             [ "${{ needs.publish-docker.result }}" == "success" ] && \
+             [ "${{ needs.publish-sdk.result }}" == "success" ] && \
+             [ "${{ needs.publish-python-sdk.result }}" == "success" ]; then
+            echo "Release ${{ github.ref_name }} completed successfully!"
+            echo "- GitHub Release: Created"
+            echo "- Docker Image: Published to GHCR"
+            echo "- Node.js SDK: Published to npm"
+            echo "- Python SDK: Published to PyPI"
+          else
+            echo "Release had some failures:"
+            echo "- GitHub Release: ${{ needs.create-release.result }}"
+            echo "- Docker Image: ${{ needs.publish-docker.result }}"
+            echo "- Node.js SDK: ${{ needs.publish-sdk.result }}"
+            echo "- Python SDK: ${{ needs.publish-python-sdk.result }}"
+            exit 1
+          fi

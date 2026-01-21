@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Discount Code' if is_edit else 'New Discount Code' }} - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('discount_codes_list') }}">Discount Codes</a></li>
+            <li class="breadcrumb-item active">{{ 'Edit Code' if is_edit else 'New Code' }}</li>
+        </ol>
+    </nav>
+    <h2 class="glow-text mb-1">{{ 'Edit Discount Code' if is_edit else 'New Discount Code' }}</h2>
+    <p class="text-muted mb-0">{{ 'Update discount code settings' if is_edit else 'Create a promotional discount code' }}</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Code <span class="text-danger">*</span></label>
+                            <input type="text" name="code" class="form-control text-uppercase" required
+                                   placeholder="e.g., SUMMER2024" style="font-family: monospace; font-size: 1.2rem;"
+                                   value="{{ form_data.get('code', '') }}">
+                            <div class="form-text">Customers will enter this code at checkout</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
+                                       {{ 'checked' if form_data.get('is_active', True) }}>
+                                <label class="form-check-label" for="is_active">Active</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Description</label>
+                        <input type="text" name="description" class="form-control"
+                               placeholder="e.g., Summer promotion - 20% off"
+                               value="{{ form_data.get('description', '') }}">
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Discount Type</label>
+                            <select name="discount_type" class="form-select" id="discountType">
+                                <option value="percentage" {{ 'selected' if form_data.get('discount_type') == 'percentage' }}>
+                                    Percentage (%)
+                                </option>
+                                <option value="fixed" {{ 'selected' if form_data.get('discount_type') == 'fixed' }}>
+                                    Fixed Amount ($)
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Discount Value <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="discountPrefix">%</span>
+                                <input type="number" name="discount_value" class="form-control" required
+                                       step="0.01" min="0"
+                                       value="{{ form_data.get('discount_value', '0') }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Maximum Uses</label>
+                            <input type="number" name="max_uses" class="form-control"
+                                   min="0" placeholder="Unlimited"
+                                   value="{{ form_data.get('max_uses', '') }}">
+                            <div class="form-text">Leave empty for unlimited uses</div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Valid From</label>
+                            <input type="datetime-local" name="valid_from" class="form-control"
+                                   value="{{ form_data.get('valid_from', '')[:16] if form_data.get('valid_from') else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Valid Until</label>
+                            <input type="datetime-local" name="valid_until" class="form-control"
+                                   value="{{ form_data.get('valid_until', '')[:16] if form_data.get('valid_until') else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Applicable Plans</label>
+                        <input type="text" name="applicable_plans" class="form-control"
+                               placeholder="Leave empty for all plans, or enter plan IDs separated by commas"
+                               value="{{ form_data.get('applicable_plans', '') }}">
+                        <div class="form-text">Leave empty to apply to all billing plans</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>{{ 'Update Code' if is_edit else 'Create Code' }}
+                        </button>
+                        <a href="{{ url_for('discount_codes_list') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Preview</h6>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <code class="fs-3" id="codePreview">CODE</code>
+                </div>
+                <div class="fs-4 text-success mb-2" id="discountPreview">0% OFF</div>
+                <p class="small text-muted mb-0" id="validityPreview">Always valid</p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-transparent">
+                <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Tips</h6>
+            </div>
+            <div class="card-body">
+                <ul class="small text-muted mb-0">
+                    <li class="mb-2">Use memorable codes (SUMMER20, LAUNCH50)</li>
+                    <li class="mb-2">Set expiration dates for urgency</li>
+                    <li class="mb-2">Limit uses to control promotion costs</li>
+                    <li>Deactivate codes instead of deleting them</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codeInput = document.querySelector('input[name="code"]');
+    const typeSelect = document.getElementById('discountType');
+    const valueInput = document.querySelector('input[name="discount_value"]');
+    const prefixSpan = document.getElementById('discountPrefix');
+    const codePreview = document.getElementById('codePreview');
+    const discountPreview = document.getElementById('discountPreview');
+
+    function updatePreview() {
+        // Update code preview
+        codePreview.textContent = codeInput.value.toUpperCase() || 'CODE';
+
+        // Update discount type prefix
+        const isPercentage = typeSelect.value === 'percentage';
+        prefixSpan.textContent = isPercentage ? '%' : '$';
+
+        // Update discount preview
+        const value = parseFloat(valueInput.value) || 0;
+        if (isPercentage) {
+            discountPreview.textContent = value + '% OFF';
+        } else {
+            discountPreview.textContent = '$' + value.toFixed(2) + ' OFF';
+        }
+    }
+
+    codeInput.addEventListener('input', updatePreview);
+    typeSelect.addEventListener('change', updatePreview);
+    valueInput.addEventListener('input', updatePreview);
+
+    updatePreview();
+});
+</script>
+{% endblock %}

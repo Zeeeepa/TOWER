@@ -1,0 +1,105 @@
+# =============================================================================
+# Owl Browser Docker Compose
+# =============================================================================
+# Quick start:
+#   docker-compose up -d
+#
+# With custom token and panel password:
+#   OWL_HTTP_TOKEN=your-secret-token OWL_PANEL_PASSWORD=your-password docker-compose up -d
+#
+# View logs:
+#   docker-compose logs -f
+#
+# Access control panel:
+#   Open http://localhost in your browser
+# =============================================================================
+
+version: '3.8'
+
+services:
+  owl-browser:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      platforms:
+        - linux/amd64
+    image: olib-browser:latest
+    container_name: owl-browser
+    restart: unless-stopped
+
+    # Port mapping
+    # Port 80: Nginx (control panel + API proxy)
+    # Port 8080: Direct API access (optional, for debugging)
+    ports:
+      - "${OWL_PANEL_PORT:-80}:80"
+      - "${OWL_HTTP_PORT:-8080}:8080"
+
+    # Environment configuration
+    environment:
+      # Server settings
+      - OWL_HTTP_HOST=0.0.0.0
+      - OWL_HTTP_PORT=8080
+      - OWL_HTTP_MAX_CONNECTIONS=${OWL_HTTP_MAX_CONNECTIONS:-100}
+      - OWL_HTTP_TIMEOUT=${OWL_HTTP_TIMEOUT:-30000}
+      - OWL_BROWSER_TIMEOUT=${OWL_BROWSER_TIMEOUT:-60000}
+
+      # Authentication (set OWL_HTTP_TOKEN in your environment)
+      - OWL_HTTP_TOKEN=${OWL_HTTP_TOKEN:-}
+      - OWL_AUTH_MODE=${OWL_AUTH_MODE:-token}
+
+      # Control panel password (for web UI login)
+      - OWL_PANEL_PASSWORD=${OWL_PANEL_PASSWORD:-changeme}
+
+      # Rate limiting
+      - OWL_RATE_LIMIT_ENABLED=${OWL_RATE_LIMIT_ENABLED:-false}
+      - OWL_RATE_LIMIT_REQUESTS=${OWL_RATE_LIMIT_REQUESTS:-100}
+      - OWL_RATE_LIMIT_WINDOW=${OWL_RATE_LIMIT_WINDOW:-60}
+      - OWL_RATE_LIMIT_BURST=${OWL_RATE_LIMIT_BURST:-20}
+
+      # CORS
+      - OWL_CORS_ENABLED=${OWL_CORS_ENABLED:-true}
+      - OWL_CORS_ORIGINS=${OWL_CORS_ORIGINS:-*}
+
+      # Logging
+      - OWL_HTTP_VERBOSE=${OWL_HTTP_VERBOSE:-false}
+      - OWL_LOG_REQUESTS=${OWL_LOG_REQUESTS:-false}
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+    # Shared memory for Chrome (required for headless browser)
+    shm_size: 2gb
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+
+    # Volume for persistent data (optional)
+    volumes:
+      - owl-data:/app/data
+
+# Persistent volume for browser data
+volumes:
+  owl-data:
+    driver: local
+
+# Optional: Create a network for multi-container setups
+networks:
+  default:
+    name: owl-network
+    driver: bridge

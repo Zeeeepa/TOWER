@@ -1,0 +1,87 @@
+{% extends "customer/base.html" %}
+
+{% block title %}My Licenses - Owl Browser Customer Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="glow-text mb-1">My Licenses</h2>
+        <p class="text-muted mb-0">View and manage your Owl Browser licenses</p>
+    </div>
+</div>
+
+{% if licenses %}
+<div class="row g-4">
+    {% for license in licenses %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge badge-license-type badge-{{ license_types.get(license.license_type, 'unknown')|lower }} me-2">
+                        {{ license_types.get(license.license_type, 'Unknown') }}
+                    </span>
+                    <span class="status-dot {{ license.status }}"></span>
+                    <span class="text-{{ 'success' if license.status == 'active' else 'danger' }}">
+                        {{ license.status|capitalize }}
+                    </span>
+                </div>
+                <a href="{{ url_for('customer.license_detail', license_id=license.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye me-1"></i>Details
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">License ID</h6>
+                        <code class="d-block p-2 bg-dark rounded small">{{ license.id }}</code>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted mb-2">Registered To</h6>
+                        <p class="mb-0">{{ license.name }}</p>
+                        <small class="text-muted">{{ license.email }}</small>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted mb-2">Active Devices</h6>
+                        <p class="mb-0 fs-4">
+                            <span class="text-{{ 'success' if license.active_seats < license.max_seats else 'danger' }}">
+                                {{ license.active_seats }}
+                            </span>
+                            <span class="text-muted">/ {{ license.max_seats }}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-3">
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Issue Date</small>
+                        <span>{{ license.issue_date|date if license.issue_date else 'N/A' }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Expiry Date</small>
+                        {% if license.expiry_date %}
+                        <span>{{ license.expiry_date|date }}</span>
+                        {% else %}
+                        <span class="badge bg-success">Perpetual</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Hardware Bound</small>
+                        <span>{{ 'Yes' if license.hardware_bound else 'No' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-key display-4 text-muted mb-3 d-block"></i>
+        <p class="text-muted">No licenses found.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

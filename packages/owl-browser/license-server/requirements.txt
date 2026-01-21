@@ -1,0 +1,21 @@
+# Owl Browser License Server Requirements
+
+# Web framework
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Security
+werkzeug>=3.0.0
+python-dotenv>=1.0.0
+
+# RSA signing for responses
+cryptography>=41.0.0
+
+# PostgreSQL support (required for Docker deployment)
+psycopg2-binary>=2.9.0
+
+# Background job scheduling
+APScheduler>=3.10.0
+
+# Optional: MySQL support (uncomment if using MySQL)
+# mysql-connector-python>=8.0.0

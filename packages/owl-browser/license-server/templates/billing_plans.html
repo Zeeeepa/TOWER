@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Billing Plans - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="glow-text mb-1">Billing Plans</h2>
+        <p class="text-muted mb-0">Manage subscription plans and pricing</p>
+    </div>
+    <a href="{{ url_for('billing_plan_new') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>New Plan
+    </a>
+</div>
+
+<div class="row">
+    {% for plan in plans %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 {{ 'border-primary' if plan.is_active else 'opacity-50' }}">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-capitalize">{{ plan.display_name or plan.name }}</h5>
+                {% if not plan.is_active %}
+                <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Monthly</span>
+                        <span class="fw-bold">{{ plan.currency }} {{ '%.2f'|format(plan.price_monthly or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Yearly</span>
+                        <span class="fw-bold">{{ plan.currency }} {{ '%.2f'|format(plan.price_yearly or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Lifetime</span>
+                        <span class="fw-bold">{{ plan.currency }} {{ '%.2f'|format(plan.price_lifetime or 0) }}</span>
+                    </div>
+                </div>
+
+                <p class="text-muted">{{ plan.description or 'No description' }}</p>
+
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Up to {{ plan.max_seats }} seat(s)
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        License type: {{ plan.license_type }}
+                    </li>
+                    {% if plan.features %}
+                    {% if plan.features is string %}
+                    {% for feature in plan.features.split(',') %}
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        {{ feature.strip() }}
+                    </li>
+                    {% endfor %}
+                    {% else %}
+                    {% for feature in plan.features %}
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        {{ feature }}
+                    </li>
+                    {% endfor %}
+                    {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{{ url_for('billing_plan_edit', plan_id=plan.id) }}" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-pencil me-1"></i>Edit Plan
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-card-list display-4 d-block mb-3 text-muted"></i>
+                <p class="text-muted mb-3">No billing plans configured</p>
+                <a href="{{ url_for('billing_plan_new') }}" class="btn btn-primary">
+                    Create your first plan
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

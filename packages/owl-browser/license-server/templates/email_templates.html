@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Email Templates - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="glow-text mb-1">Email Templates</h2>
+    <p class="text-muted mb-0">Manage automated email templates</p>
+</div>
+
+<div class="row">
+    {% for template in templates %}
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 {{ 'border-secondary opacity-50' if not template.is_active }}">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-envelope me-2"></i>{{ template.name|replace('_', ' ')|title }}
+                </h5>
+                {% if template.is_active %}
+                <span class="badge bg-success">Active</span>
+                {% else %}
+                <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">Subject</small>
+                    <p class="mb-0 fw-bold">{{ template.subject }}</p>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Preview</small>
+                    <p class="text-muted small mb-0">
+                        {{ template.body_text[:150] }}{% if template.body_text|length > 150 %}...{% endif %}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('email_template_edit', template_id=template.id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent">
+                <small class="text-muted">
+                    Last updated: {{ template.updated_at|datetime if template.updated_at else 'Never' }}
+                </small>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-envelope display-4 d-block mb-3 text-muted"></i>
+                <p class="text-muted mb-0">No email templates configured</p>
+                <p class="small text-muted">Run the database initialization script to create default templates</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-transparent">
+        <h5 class="mb-0"><i class="bi bi-code-slash me-2"></i>Available Template Variables</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Use these variables in your email templates. They will be replaced with actual values when sending.</p>
+        <div class="row">
+            <div class="col-md-4">
+                <h6>Customer</h6>
+                <ul class="small text-muted mb-0">
+                    <li><code>{{customer_name}}</code></li>
+                    <li><code>{{customer_email}}</code></li>
+                    <li><code>{{company_name}}</code></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>License</h6>
+                <ul class="small text-muted mb-0">
+                    <li><code>{{license_id}}</code></li>
+                    <li><code>{{license_type}}</code></li>
+                    <li><code>{{expiry_date}}</code></li>
+                    <li><code>{{seats}}</code></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>Subscription</h6>
+                <ul class="small text-muted mb-0">
+                    <li><code>{{subscription_status}}</code></li>
+                    <li><code>{{renewal_date}}</code></li>
+                    <li><code>{{plan_name}}</code></li>
+                    <li><code>{{amount}}</code></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

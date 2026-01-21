@@ -1,0 +1,59 @@
+# ==============================================================================
+# Owl Browser License Server - Docker Ignore
+# ==============================================================================
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Data directories (mounted as volumes)
+data/
+licenses/
+logs/
+
+# Keys (mounted as volume - do not include in image!)
+keys/
+*.pem
+*.key
+
+# Test and documentation
+tests/
+*.md
+!README.md
+
+# Docker
+docker-compose*.yml
+.docker/
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Local config
+.env.local
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db

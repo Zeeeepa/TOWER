@@ -1,0 +1,139 @@
+agent:
+  auto_approve: true
+  max_iterations: 50
+  timeout_seconds: 300
+
+# Fast Mode - Bypass LLM planning for simple actions (15-30x speedup)
+fast_mode:
+  enabled: true  # Set to false to always use full LLM mode
+  verbose: false  # Set to true to log all fast mode attempts
+
+llm:
+  # mode: "local" for dev, "remote" for prod (uses GPU server)
+  # Override with EVERSALE_LLM_MODE env var
+  mode: remote
+
+  # Local Ollama URL (used when mode=local)
+  local_url: http://127.0.0.1:11434
+
+  # Remote GPU URL (used when mode=remote)
+  # Use eversale.io proxy for license validation
+  remote_url: https://eversale.io/api/llm
+
+  # =============================================================
+  # MODEL CONFIGURATION (3 models only)
+  # =============================================================
+  # 1. qwen3:8b - Text/reasoning/tool calling (fast, native function calling)
+  # 2. UI-TARS (0000/ui-tars-1.5-7b) - Vision tasks only
+  # 3. Kimi API - Complex reasoning (external API)
+  # =============================================================
+
+  # Primary model - UI-TARS for text/reasoning/tool calling
+  main_model: 0000/ui-tars-1.5-7b:latest
+  fast_model: 0000/ui-tars-1.5-7b:latest
+  tool_calling_model: 0000/ui-tars-1.5-7b:latest
+
+  # Vision model - UI-TARS only (optimized for UI understanding)
+  vision_model: 0000/ui-tars-1.5-7b:latest
+  web_vision_model: 0000/ui-tars-1.5-7b:latest
+
+  # Complex reasoning - Kimi API (external)
+  complex_model: kimi
+  kimi_api_url: https://api.moonshot.ai/v1
+  # Set KIMI_API_KEY env var for authentication
+
+# Strategic Planner Configuration - Kimi for FIRST and LAST calls
+# This is a general-purpose autonomous browsing agent, not just prospecting
+strategic_planner:
+  enabled: true
+  primary_llm: kimi  # Kimi for initial planning
+  recovery_threshold: 2
+  kimi_timeout_seconds: 120.0  # Extended for remote GPU latency
+  qwen_timeout_seconds: 120.0  # Extended for remote GPU latency
+  max_fallback_retries: 3
+  max_total_retries: 5
+  escalate_after_failures: 1
+
+# HTN Planning - Hierarchical Task Network for complex multi-step tasks
+# Detects complex tasks (multi-platform, multiple URLs, complex workflows)
+# and creates upfront plans with dependencies, fallbacks, and coordination
+planning:
+  enabled: true  # Set to false to disable HTN planning entirely
+  max_depth: 3  # Maximum decomposition depth
+  use_templates: true  # Use reusable templates when available
+  checkpoint_interval: 5  # Create checkpoint every N steps
+
+# LLM Call Strategy for General-Purpose Agent
+# - FIRST: Kimi (complex task understanding/decomposition)
+# - MIDDLE: qwen3:8b (fast execution steps)
+# - LAST: Kimi (complex synthesis/summary)
+llm_strategy:
+  first_call_model: kimi    # Always use Kimi for initial understanding
+  execution_model: qwen3:8b  # Fast model for middle steps
+  final_call_model: kimi    # Always use Kimi for final synthesis
+
+  temperature: 0.1
+  max_tokens: 4096
+  timeout_ms: 60000
+
+visual_targeting:
+  enabled: true
+  mode: auto
+  model: 0000/ui-tars-1.5-7b:latest
+
+browser:
+  headless_default: true
+  use_persistent_context: true
+  nav_timeout: 30000
+  operation_timeout: 120000
+  # Accessibility-first element finding (Playwright MCP pattern)
+  # Uses accessibility tree refs instead of CSS selectors for reliability
+  # Set to false to use legacy CSS selector mode only
+  use_a11y_first: true
+
+timing:
+  loop_delay: 2
+  nav_delay: 2
+  click_delay: 0.5
+  content_load_delay: 3
+
+logging:
+  level: INFO
+
+# Dual-LLM Architecture (ChromePilot v2 pattern)
+dual_llm:
+  enabled: true
+  orchestrator_model: 0000/ui-tars-1.5-7b:latest  # UI-TARS for vision/planning
+  executor_model: qwen3:8b  # qwen3 for fast execution + function calling
+
+# Worker Loop Settings
+worker:
+  max_steps: 20
+  context_window: 8192
+  max_tokens_planner: 512
+  max_tokens_navigator: 256
+
+# Web Daemon Settings
+web_daemon:
+  cache_ttl_seconds: 900  # 15 minutes
+  rate_limit_per_domain: 10  # requests per minute
+  collectors:
+    - simple_http
+    - playwright
+    - alt_frontend
+  fallback_enabled: true
+
+# Tool Wrapper Settings
+tool_wrappers:
+  max_retries: 3
+  backoff_base: 2  # seconds
+  lock_threshold: 5  # failures before locking
+
+# Safety Defaults
+safety:
+  default_allowed_domains: []  # empty = all allowed
+  forbidden_actions:
+    - delete_account
+    - permanently_delete_data
+    - unsubscribe_all
+  destructive_confirmation: true

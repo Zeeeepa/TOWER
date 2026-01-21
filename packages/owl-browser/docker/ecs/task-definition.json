@@ -1,0 +1,118 @@
+{
+  "family": "owl-browser",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["EC2", "FARGATE"],
+  "cpu": "4096",
+  "memory": "8192",
+  "executionRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "owl-browser",
+      "image": "YOUR_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/olib-browser:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp",
+          "name": "web"
+        },
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp",
+          "name": "api"
+        }
+      ],
+      "environment": [
+        {
+          "name": "OWL_HTTP_HOST",
+          "value": "0.0.0.0"
+        },
+        {
+          "name": "OWL_HTTP_PORT",
+          "value": "8080"
+        },
+        {
+          "name": "OWL_HTTP_MAX_CONNECTIONS",
+          "value": "100"
+        },
+        {
+          "name": "OWL_BROWSER_TIMEOUT",
+          "value": "60000"
+        },
+        {
+          "name": "OWL_HTTP_TIMEOUT",
+          "value": "30000"
+        },
+        {
+          "name": "OWL_RATE_LIMIT_ENABLED",
+          "value": "false"
+        },
+        {
+          "name": "OWL_CORS_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "OWL_CORS_ORIGINS",
+          "value": "*"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "OWL_HTTP_TOKEN",
+          "valueFrom": "arn:aws:secretsmanager:YOUR_REGION:YOUR_ACCOUNT_ID:secret:owl-browser/http-token"
+        },
+        {
+          "name": "OWL_PANEL_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:YOUR_REGION:YOUR_ACCOUNT_ID:secret:owl-browser/panel-password"
+        }
+      ],
+      "linuxParameters": {
+        "sharedMemorySize": 2048,
+        "initProcessEnabled": true
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/owl-browser",
+          "awslogs-region": "YOUR_REGION",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8080/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 60
+      },
+      "ulimits": [
+        {
+          "name": "nofile",
+          "softLimit": 65536,
+          "hardLimit": 65536
+        }
+      ],
+      "mountPoints": [],
+      "volumesFrom": []
+    }
+  ],
+  "volumes": [],
+  "placementConstraints": [],
+  "tags": [
+    {
+      "key": "Application",
+      "value": "owl-browser"
+    },
+    {
+      "key": "Environment",
+      "value": "production"
+    }
+  ]
+}

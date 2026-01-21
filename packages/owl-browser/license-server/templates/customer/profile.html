@@ -1,0 +1,148 @@
+{% extends "customer/base.html" %}
+
+{% block title %}Profile - Owl Browser Customer Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="glow-text mb-1">Profile</h2>
+        <p class="text-muted mb-0">Manage your account information</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-geo-alt me-2 text-primary"></i>Address Information
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" name="phone" class="form-control"
+                                   value="{{ user.phone or '' }}"
+                                   placeholder="+1 (555) 123-4567">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Country</label>
+                            <select name="country" class="form-select">
+                                <option value="US" {{ 'selected' if user.country == 'US' else '' }}>United States</option>
+                                <option value="CA" {{ 'selected' if user.country == 'CA' else '' }}>Canada</option>
+                                <option value="GB" {{ 'selected' if user.country == 'GB' else '' }}>United Kingdom</option>
+                                <option value="DE" {{ 'selected' if user.country == 'DE' else '' }}>Germany</option>
+                                <option value="FR" {{ 'selected' if user.country == 'FR' else '' }}>France</option>
+                                <option value="AU" {{ 'selected' if user.country == 'AU' else '' }}>Australia</option>
+                                <option value="JP" {{ 'selected' if user.country == 'JP' else '' }}>Japan</option>
+                                <option value="IN" {{ 'selected' if user.country == 'IN' else '' }}>India</option>
+                                <option value="BR" {{ 'selected' if user.country == 'BR' else '' }}>Brazil</option>
+                                <option value="MX" {{ 'selected' if user.country == 'MX' else '' }}>Mexico</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address Line 1</label>
+                            <input type="text" name="address_line1" class="form-control"
+                                   value="{{ user.address_line1 or '' }}"
+                                   placeholder="123 Main Street">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address Line 2</label>
+                            <input type="text" name="address_line2" class="form-control"
+                                   value="{{ user.address_line2 or '' }}"
+                                   placeholder="Apt 4B (optional)">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">City</label>
+                            <input type="text" name="city" class="form-control"
+                                   value="{{ user.city or '' }}"
+                                   placeholder="New York">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">State/Province</label>
+                            <input type="text" name="state" class="form-control"
+                                   value="{{ user.state or '' }}"
+                                   placeholder="NY">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" name="postal_code" class="form-control"
+                                   value="{{ user.postal_code or '' }}"
+                                   placeholder="10001">
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Account Info (Read-only) -->
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-person me-2 text-info"></i>Account Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Email</label>
+                    <p class="mb-0">{{ user.email }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">License Name</label>
+                    <p class="mb-0">{{ user.license_name }}</p>
+                </div>
+                {% if user.organization %}
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Organization</label>
+                    <p class="mb-0">{{ user.organization }}</p>
+                </div>
+                {% endif %}
+                {% if user.customer_company %}
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Company</label>
+                    <p class="mb-0">{{ user.customer_company }}</p>
+                </div>
+                {% endif %}
+
+                <hr class="border-secondary">
+
+                <div class="text-muted small">
+                    <p class="mb-1">
+                        <i class="bi bi-calendar me-1"></i>
+                        Member since {{ user.created_at|date if user.created_at else 'N/A' }}
+                    </p>
+                    <p class="mb-0">
+                        <i class="bi bi-clock me-1"></i>
+                        Last login {{ user.last_login_at|date if user.last_login_at else 'N/A' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security -->
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-lock me-2 text-warning"></i>Security
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Keep your account secure by using a strong password.</p>
+                <a href="{{ url_for('customer.change_password') }}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-key me-2"></i>Change Password
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

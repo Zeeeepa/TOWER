@@ -1,0 +1,236 @@
+{% extends "customer/base.html" %}
+
+{% block title %}License Details - Owl Browser Customer Portal{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('customer.licenses') }}" class="text-muted text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i>Back to Licenses
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Main Info -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <span class="badge badge-license-type badge-{{ license_types[license.license_type]|lower }} me-2">
+                        {{ license_types[license.license_type] }}
+                    </span>
+                    License Details
+                </h4>
+                <span class="status-dot {{ license.status }} me-1"></span>
+                <span class="text-{{ 'success' if license.status == 'active' else 'danger' }}">{{ license.status|capitalize }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <h6 class="text-muted mb-2">License ID</h6>
+                        <code class="fs-6 d-block p-2 bg-dark rounded">{{ license.id }}</code>
+                    </div>
+
+                    <div class="col-12"><hr class="border-secondary"></div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-person me-1"></i>Registered To
+                        </h6>
+                        <p class="mb-1 fs-5">{{ license.name }}</p>
+                        <p class="mb-1 text-muted">{{ license.email }}</p>
+                        {% if license.organization %}
+                        <p class="mb-0 text-muted">{{ license.organization }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-calendar me-1"></i>Dates
+                        </h6>
+                        <p class="mb-1">
+                            <span class="text-muted">Issued:</span>
+                            {{ license.issue_date|date if license.issue_date else 'N/A' }}
+                        </p>
+                        <p class="mb-0">
+                            <span class="text-muted">Expires:</span>
+                            {% if license.expiry_date %}
+                            {{ license.expiry_date|date }}
+                            {% else %}
+                            <span class="badge bg-success">Perpetual</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="col-12"><hr class="border-secondary"></div>
+
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-laptop me-1"></i>Max Devices
+                        </h6>
+                        <p class="fs-4 mb-0">{{ license.max_seats }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-cpu me-1"></i>Hardware Bound
+                        </h6>
+                        <p class="mb-0">
+                            {% if license.hardware_bound %}
+                            <span class="badge bg-warning">Yes</span>
+                            {% else %}
+                            <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-flag me-1"></i>Features
+                        </h6>
+                        <p class="mb-0">
+                            <code>{{ license.feature_flags or 'All' }}</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription Info (if applicable) -->
+        {% if subscription %}
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-repeat text-info me-2"></i>Subscription Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Status</h6>
+                        <span class="badge bg-{{ 'success' if subscription.status == 'active' else 'danger' }} fs-6">
+                            {{ subscription.status|capitalize }}
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Grace Period</h6>
+                        <p class="mb-0">{{ subscription.grace_period_days }} days</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Activation</h6>
+                        <p class="mb-0">{{ subscription.activation_date|date if subscription.activation_date else 'Not activated' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Last Check</h6>
+                        <p class="mb-0">{{ subscription.last_check_date|date if subscription.last_check_date else 'Never' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-2">Next Check</h6>
+                        <p class="mb-0">{{ subscription.next_check_date|date if subscription.next_check_date else 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Active Devices -->
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-pc-display-horizontal me-2"></i>Active Devices
+                </h5>
+                <span class="badge bg-{{ 'success' if active_seat_count < license.max_seats else 'danger' }} fs-6">
+                    {{ active_seat_count }} / {{ license.max_seats }}
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Hardware ID</th>
+                                <th>First Activated</th>
+                                <th>Last Seen</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for seat in seats if seat.is_active %}
+                            <tr>
+                                <td>
+                                    {% if seat.device_name %}
+                                    <div>{{ seat.device_name }}</div>
+                                    {% else %}
+                                    <div class="text-muted">Unknown device</div>
+                                    {% endif %}
+                                    {% if seat.os_info %}
+                                    <small class="text-muted">{{ seat.os_info }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <code class="small" title="{{ seat.hardware_fingerprint }}">
+                                        {{ seat.hardware_fingerprint[:20] }}...
+                                    </code>
+                                </td>
+                                <td class="text-muted small">{{ seat.first_activated_at|date if seat.first_activated_at else 'N/A' }}</td>
+                                <td class="text-muted small">{{ seat.last_seen_at|date if seat.last_seen_at else 'N/A' }}</td>
+                                <td>
+                                    <form action="{{ url_for('customer.deactivate_seat', license_id=license.id, hardware_fingerprint=seat.hardware_fingerprint) }}"
+                                          method="POST" class="d-inline"
+                                          onsubmit="return confirm('Deactivate this device? You will need to re-activate on that device.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-x"></i> Deactivate
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No devices activated yet
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Tips -->
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightbulb me-2 text-warning"></i>Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0 ps-3">
+                    <li class="mb-2">You can deactivate a device to free up a seat for another device.</li>
+                    <li class="mb-2">Deactivating a device will sign it out of Owl Browser.</li>
+                    <li>Contact support if you need to increase your device limit.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- License Info -->
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Info
+                </h5>
+            </div>
+            <div class="card-body small">
+                <p class="mb-2">
+                    <span class="text-muted">Created:</span><br>
+                    {{ license.created_at|date if license.created_at else 'N/A' }}
+                </p>
+                <p class="mb-0">
+                    <span class="text-muted">Last Updated:</span><br>
+                    {{ license.updated_at|date if license.updated_at else 'N/A' }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

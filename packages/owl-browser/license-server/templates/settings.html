@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Owl License Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="glow-text mb-1">Settings</h2>
+    <p class="text-muted mb-0">Configure system settings</p>
+</div>
+
+<form method="POST" action="{{ url_for('settings_update') }}">
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <!-- Company Settings -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-building me-2"></i>Company Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Company Name</label>
+                        <input type="text" name="setting_company_name" class="form-control"
+                               value="{{ settings.get('company_name', 'Owl Browser') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Support Email</label>
+                        <input type="email" name="setting_support_email" class="form-control"
+                               value="{{ settings.get('support_email', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Website URL</label>
+                        <input type="url" name="setting_website_url" class="form-control"
+                               value="{{ settings.get('website_url', '') }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- License Settings -->
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-key me-2"></i>License Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Default Trial Days</label>
+                        <input type="number" name="setting_default_trial_days" class="form-control"
+                               min="1" max="365"
+                               value="{{ settings.get('default_trial_days', '14') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Default Grace Period (days)</label>
+                        <input type="number" name="setting_default_grace_period" class="form-control"
+                               min="0" max="30"
+                               value="{{ settings.get('default_grace_period', '7') }}">
+                        <div class="form-text">Days after subscription expires before license is revoked</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Max Seats Per License</label>
+                        <input type="number" name="setting_max_seats_per_license" class="form-control"
+                               min="1" max="1000"
+                               value="{{ settings.get('max_seats_per_license', '100') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <!-- Email Settings -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-envelope me-2"></i>Email Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">SMTP Host</label>
+                        <input type="text" name="setting_smtp_host" class="form-control"
+                               placeholder="smtp.example.com"
+                               value="{{ settings.get('smtp_host', '') }}">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-8">
+                            <label class="form-label">SMTP Port</label>
+                            <input type="number" name="setting_smtp_port" class="form-control"
+                                   placeholder="587"
+                                   value="{{ settings.get('smtp_port', '587') }}">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">Use TLS</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="setting_smtp_tls"
+                                       {{ 'checked' if settings.get('smtp_tls', 'true') == 'true' }}>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SMTP Username</label>
+                        <input type="text" name="setting_smtp_username" class="form-control"
+                               value="{{ settings.get('smtp_username', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SMTP Password</label>
+                        <input type="password" name="setting_smtp_password" class="form-control"
+                               placeholder="********"
+                               value="{{ settings.get('smtp_password', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">From Email</label>
+                        <input type="email" name="setting_from_email" class="form-control"
+                               placeholder="noreply@example.com"
+                               value="{{ settings.get('from_email', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">From Name</label>
+                        <input type="text" name="setting_from_name" class="form-control"
+                               placeholder="Owl Browser Licensing"
+                               value="{{ settings.get('from_name', 'Owl Browser Licensing') }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Settings -->
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Invoice Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Invoice Prefix</label>
+                        <input type="text" name="setting_invoice_prefix" class="form-control"
+                               placeholder="INV-"
+                               value="{{ settings.get('invoice_prefix', 'INV-') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Default Currency</label>
+                        <select name="setting_default_currency" class="form-select">
+                            <option value="USD" {{ 'selected' if settings.get('default_currency', 'USD') == 'USD' }}>USD - US Dollar</option>
+                            <option value="EUR" {{ 'selected' if settings.get('default_currency') == 'EUR' }}>EUR - Euro</option>
+                            <option value="GBP" {{ 'selected' if settings.get('default_currency') == 'GBP' }}>GBP - British Pound</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Default Tax Rate (%)</label>
+                        <input type="number" name="setting_default_tax_rate" class="form-control"
+                               min="0" max="100" step="0.01"
+                               value="{{ settings.get('default_tax_rate', '0') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Terms (days)</label>
+                        <input type="number" name="setting_payment_terms" class="form-control"
+                               min="0" max="90"
+                               value="{{ settings.get('payment_terms', '30') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>Save Settings
+        </button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

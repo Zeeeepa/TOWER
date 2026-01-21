@@ -1,0 +1,51 @@
+{
+  "name": "@olib-ai/owl-browser-chatgpt-app",
+  "version": "1.0.0",
+  "description": "ChatGPT App for Owl Browser - AI-First Browser Automation",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:server": "node server/index.js",
+    "dev:web": "esbuild web/src/App.tsx --bundle --format=esm --outfile=web/dist/component.js --watch --servedir=web/dist",
+    "build": "npm run build:web && npm run build:server",
+    "build:web": "esbuild web/src/App.tsx --bundle --format=esm --outfile=web/dist/component.js --minify",
+    "build:server": "echo 'Server ready'",
+    "start": "node server/index.js",
+    "tunnel": "ngrok http 3847"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@ngrok/ngrok": "^1.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "concurrently": "^8.2.2",
+    "esbuild": "0.25.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Olib AI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Olib-AI/owl-browser"
+  },
+  "keywords": [
+    "chatgpt",
+    "mcp",
+    "browser",
+    "automation",
+    "ai",
+    "owl-browser"
+  ]
+}

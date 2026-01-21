@@ -1,0 +1,106 @@
+# ==============================================================================
+# Owl Browser License Server - Docker Compose
+# ==============================================================================
+# Usage:
+#   docker-compose up -d              # Start in background
+#   docker-compose logs -f            # Follow logs
+#   docker-compose down               # Stop and remove containers
+#   docker-compose build --no-cache   # Rebuild without cache
+#
+# First-time setup:
+#   1. Copy .env.example to .env and configure
+#   2. Place your RSA keys in ./keys/ directory
+#      (or set GENERATE_KEYS=true in .env to auto-generate)
+#   3. Run: ./build-docker.sh && docker-compose up -d
+#
+# Key Management:
+#   - Mount existing keys to /app/keys/
+#   - Or set GENERATE_KEYS=true to auto-generate (not recommended for production)
+#   - Keys must match the public key embedded in your browser build
+# ==============================================================================
+
+services:
+  owl-license-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: owl-license-server:latest
+    container_name: owl-license-server
+    hostname: owl-license-server
+    restart: unless-stopped
+
+    # Ports
+    ports:
+      # Admin Server (with Customer Portal at /portal)
+      - "${OLIB_ADMIN_PORT:-3035}:3035"
+      # License/Subscription API Server
+      - "${OLIB_LICENSE_SERVER_PORT:-3034}:3034"
+
+    # Persistent volumes
+    volumes:
+      # RSA keys for license signing (REQUIRED for production)
+      - ./keys:/app/keys:ro
+      # Database data (PostgreSQL stores here)
+      - owl-db-data:/var/lib/postgresql/17/main
+      # Application data
+      - ./data:/app/data
+      # Generated license files
+      - ./licenses:/app/licenses
+      # Log files
+      - ./logs:/app/logs
+
+    # Secrets (password hashes with $ signs - loaded without interpolation)
+    env_file:
+      - secrets.env
+
+    # Environment configuration
+    environment:
+      # Database
+      - OLIB_DB_TYPE=postgresql
+      - OLIB_DB_HOST=localhost
+      - OLIB_DB_PORT=5432
+      - OLIB_DB_NAME=${OLIB_DB_NAME:-olib_licenses}
+      - OLIB_DB_USER=${OLIB_DB_USER:-olib}
+      - OLIB_DB_PASSWORD=${OLIB_DB_PASSWORD:-olib_secure_password}
+
+      # Admin Server
+      - OLIB_ADMIN_HOST=0.0.0.0
+      - OLIB_ADMIN_PORT=3035
+      - OLIB_ADMIN_USERNAME=${OLIB_ADMIN_USERNAME:-admin}
+      # OLIB_ADMIN_PASSWORD_HASH is set in secrets.env (contains $ signs)
+      - OLIB_ADMIN_SECRET_KEY=${OLIB_ADMIN_SECRET_KEY:-change-this-in-production}
+
+      # License Server
+      - OLIB_LICENSE_SERVER_HOST=0.0.0.0
+      - OLIB_LICENSE_SERVER_PORT=3034
+
+      # Security
+      - OWL_NONCE_HMAC_SECRET=${OWL_NONCE_HMAC_SECRET:-change-this-in-production}
+      - SESSION_LIFETIME_HOURS=${SESSION_LIFETIME_HOURS:-168}
+      - NONCE_TIMESTAMP_TOLERANCE=${NONCE_TIMESTAMP_TOLERANCE:-300}
+
+      # Key generation (set to true to auto-generate if keys don't exist)
+      - GENERATE_KEYS=${GENERATE_KEYS:-false}
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3034/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+# Named volumes for persistent storage
+volumes:
+  owl-db-data:
+    driver: local
