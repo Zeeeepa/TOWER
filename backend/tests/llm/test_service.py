@@ -5,13 +5,13 @@ from __future__ import annotations
 import pytest
 from pydantic import SecretStr
 
-from autoqa.llm.config import (
+from web2api.llm.config import (
     LLMConfig,
     LLMEndpointConfig,
     ToolLLMConfig,
     ToolName,
 )
-from autoqa.llm.service import LLMResult, LLMService
+from web2api.llm.service import LLMResult, LLMService
 
 
 class TestLLMService:

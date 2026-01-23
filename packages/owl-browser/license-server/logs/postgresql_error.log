@@ -1,0 +1,64 @@
+2026-01-22 16:31:17.875 UTC [54] LOG:  starting PostgreSQL 17.7 (Ubuntu 17.7-3.pgdg24.04+1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, 64-bit
+2026-01-22 16:31:17.886 UTC [54] LOG:  listening on IPv6 address "::1", port 5432
+2026-01-22 16:31:17.896 UTC [54] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-01-22 16:31:17.906 UTC [54] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-01-22 16:31:17.910 UTC [59] LOG:  database system was shut down at 2026-01-22 16:31:14 UTC
+2026-01-22 16:31:17.913 UTC [54] LOG:  database system is ready to accept connections
+2026-01-22 16:31:32.128 UTC [42] LOG:  starting PostgreSQL 17.7 (Ubuntu 17.7-3.pgdg24.04+1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, 64-bit
+2026-01-22 16:31:32.138 UTC [42] LOG:  listening on IPv6 address "::1", port 5432
+2026-01-22 16:31:32.148 UTC [42] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-01-22 16:31:32.159 UTC [42] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-01-22 16:31:32.162 UTC [47] LOG:  database system was shut down at 2026-01-22 16:31:28 UTC
+2026-01-22 16:31:32.165 UTC [42] LOG:  database system is ready to accept connections
+2026-01-22 16:36:32.807 UTC [45] LOG:  checkpoint starting: time
+2026-01-22 16:36:32.879 UTC [45] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.031 s, sync=0.006 s, total=0.073 s; sync files=2, longest=0.003 s, average=0.003 s; distance=0 kB, estimate=0 kB; lsn=0/19B9DF8, redo lsn=0/19B9DA0
+2026-01-22 17:12:10.916 UTC [42] LOG:  received smart shutdown request
+2026-01-22 17:12:11.017 UTC [42] LOG:  background worker "logical replication launcher" (PID 50) exited with exit code 1
+2026-01-22 17:12:11.018 UTC [45] LOG:  shutting down
+2026-01-22 17:12:11.020 UTC [45] LOG:  checkpoint starting: shutdown immediate
+2026-01-22 17:12:11.030 UTC [45] LOG:  checkpoint complete: wrote 0 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.001 s, total=0.012 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/19B9EA8, redo lsn=0/19B9EA8
+2026-01-22 17:12:11.033 UTC [42] LOG:  database system is shut down
+2026-01-22 17:13:05.716 UTC [54] LOG:  starting PostgreSQL 17.7 (Ubuntu 17.7-3.pgdg24.04+1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, 64-bit
+2026-01-22 17:13:05.727 UTC [54] LOG:  listening on IPv6 address "::1", port 5432
+2026-01-22 17:13:05.737 UTC [54] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-01-22 17:13:05.747 UTC [54] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-01-22 17:13:05.751 UTC [59] LOG:  database system was shut down at 2026-01-22 17:13:02 UTC
+2026-01-22 17:13:05.755 UTC [54] LOG:  database system is ready to accept connections
+2026-01-22 17:18:05.210 UTC [57] LOG:  checkpoint starting: time
+2026-01-22 17:18:13.804 UTC [57] LOG:  checkpoint complete: wrote 89 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=8.576 s, sync=0.011 s, total=8.595 s; sync files=22, longest=0.003 s, average=0.001 s; distance=458 kB, estimate=458 kB; lsn=0/1A2C628, redo lsn=0/1A2C5D0
+2026-01-22 17:25:33.945 UTC [67] ERROR:  insert or update on table "activation_logs" violates foreign key constraint "activation_logs_license_id_fkey"
+2026-01-22 17:25:33.945 UTC [67] DETAIL:  Key (license_id)=(432fb495-9e03-43f5-81a0-a6f764a224eb) is not present in table "licenses".
+2026-01-22 17:25:33.945 UTC [67] STATEMENT:  
+	            INSERT INTO activation_logs (
+	                license_id, customer_id, action, hardware_fingerprint, ip_address,
+	                user_agent, success, error_message, created_at
+	            ) VALUES ('432fb495-9e03-43f5-81a0-a6f764a224eb', NULL, 'activation', '1e6e83f9cab44a90ba2b96fa319c3e785651837169c92dd5a26edb61f18c1df1', '172.18.0.1', '', false, 'License not found', '2026-01-22T17:25:33.941437+00:00')
+	        
+2026-01-22 17:28:05.575 UTC [57] LOG:  checkpoint starting: time
+2026-01-22 17:28:10.103 UTC [57] LOG:  checkpoint complete: wrote 46 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.518 s, sync=0.006 s, total=4.529 s; sync files=28, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=413 kB; lsn=0/1A2F9C0, redo lsn=0/1A2F968
+2026-01-22 17:33:05.509 UTC [57] LOG:  checkpoint starting: time
+2026-01-22 17:33:07.030 UTC [57] LOG:  checkpoint complete: wrote 16 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.511 s, sync=0.006 s, total=1.522 s; sync files=16, longest=0.002 s, average=0.001 s; distance=7 kB, estimate=373 kB; lsn=0/1A31928, redo lsn=0/1A318D0
+2026-01-22 17:38:05.380 UTC [57] LOG:  checkpoint starting: time
+2026-01-22 17:38:05.892 UTC [57] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.503 s, sync=0.003 s, total=0.512 s; sync files=6, longest=0.002 s, average=0.001 s; distance=2 kB, estimate=336 kB; lsn=0/1A32448, redo lsn=0/1A323B8
+2026-01-22 19:06:12.286 UTC [2078] ERROR:  null value in column "email" of relation "admin_users" violates not-null constraint
+2026-01-22 19:06:12.286 UTC [2078] DETAIL:  Failing row contains (admin-001, admin, null, scrypt:32768:8:1$nDgpasULfXxwdJTl$4362ed9f929035dd115454b63f3e1c..., superadmin, t, null, 2026-01-22 19:06:12.285117, 2026-01-22 19:06:12.285117).
+2026-01-22 19:06:12.286 UTC [2078] STATEMENT:  
+	    INSERT INTO admin_users (id, username, password_hash, role, created_at, updated_at)
+	    VALUES ('admin-001', 'admin', 'scrypt:32768:8:1$nDgpasULfXxwdJTl$4362ed9f929035dd115454b63f3e1c16474630c6cfc88c58b060d951ba98df8b7c1ec5c71699d249b00fb5e89ad4581ea1a7c38fb58bea8882997a26fc65ba1a', 'superadmin', NOW(), NOW())
+	
+2026-01-22 19:08:05.049 UTC [57] LOG:  checkpoint starting: time
+2026-01-22 19:08:06.367 UTC [57] LOG:  checkpoint complete: wrote 14 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.308 s, sync=0.005 s, total=1.319 s; sync files=11, longest=0.003 s, average=0.001 s; distance=4 kB, estimate=303 kB; lsn=0/1A336D0, redo lsn=0/1A33678
+2026-01-22 19:10:02.077 UTC [54] LOG:  received smart shutdown request
+2026-01-22 19:10:02.248 UTC [54] LOG:  background worker "logical replication launcher" (PID 62) exited with exit code 1
+2026-01-22 19:10:02.249 UTC [57] LOG:  shutting down
+2026-01-22 19:10:02.250 UTC [57] LOG:  checkpoint starting: shutdown immediate
+2026-01-22 19:10:02.260 UTC [57] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.003 s, total=0.011 s; sync files=7, longest=0.002 s, average=0.001 s; distance=3 kB, estimate=273 kB; lsn=0/1A34330, redo lsn=0/1A34330
+2026-01-22 19:10:02.265 UTC [54] LOG:  database system is shut down
+2026-01-22 19:10:11.054 UTC [42] LOG:  starting PostgreSQL 17.7 (Ubuntu 17.7-3.pgdg24.04+1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, 64-bit
+2026-01-22 19:10:11.064 UTC [42] LOG:  listening on IPv6 address "::1", port 5432
+2026-01-22 19:10:11.075 UTC [42] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-01-22 19:10:11.085 UTC [42] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-01-22 19:10:11.088 UTC [47] LOG:  database system was shut down at 2026-01-22 19:10:07 UTC
+2026-01-22 19:10:11.093 UTC [42] LOG:  database system is ready to accept connections
+2026-01-22 19:15:11.149 UTC [45] LOG:  checkpoint starting: time
+2026-01-22 19:15:11.867 UTC [45] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.708 s, sync=0.004 s, total=0.718 s; sync files=8, longest=0.002 s, average=0.001 s; distance=3 kB, estimate=3 kB; lsn=0/1A35088, redo lsn=0/1A35030

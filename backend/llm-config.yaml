@@ -1,0 +1,52 @@
+# LLM Configuration for AutoQA + Web2API
+# Uses Z.AI API (Anthropic-compatible endpoint)
+
+enabled: true
+
+default_endpoint:
+  # Z.AI API Configuration (Anthropic-compatible)
+  base_url: "https://api.z.ai/api/anthropic"
+  api_key: "b55b1444d18642059abefbbc7dc8ebe2.G7Zuz4CGmSbkvxyJ"
+  model: "glm-4.6v"
+  provider: "anthropic"
+  temperature: 0.3
+  max_tokens: 4096
+  timeout_ms: 60000
+  
+  # Retry configuration
+  retry:
+    max_retries: 3
+    initial_delay_ms: 1000
+    max_delay_ms: 30000
+    exponential_base: 2.0
+    jitter: true
+  
+  # Rate limiting
+  rate_limit:
+    requests_per_minute: 60
+    tokens_per_minute: 100000
+    concurrent_requests: 5
+
+# Tool-specific configurations
+test_builder:
+  enabled: true
+  temperature: 0.3
+  max_tokens: 4096
+
+step_transformer:
+  enabled: true
+  temperature: 0.2
+  max_tokens: 2048
+
+assertions:
+  enabled: true
+  temperature: 0.1
+  max_tokens: 1024
+
+self_healing:
+  enabled: true
+  temperature: 0.3
+  max_tokens: 2048
+
+chaos_agents:
+  enabled: false

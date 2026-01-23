@@ -1,0 +1,76 @@
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Admin Server                   ║
+╠═══════════════════════════════════════════════════════════════╣
+║  URL: http://0.0.0.0:3035                              ║
+║  Username: admin                                          ║
+║  Password: ****************              ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+✅ Background scheduler started
+   Scheduled jobs: 6
+   - Check Overdue Invoices: next run at 2026-01-22T17:31:18.026780+00:00
+   - Cleanup Expired Sessions: next run at 2026-01-22T20:31:18.027102+00:00
+   - Process Severely Overdue Invoices: next run at 2026-01-22T22:31:18.026950+00:00
+   - Cleanup Old Nonces: next run at 2026-01-23T03:00:00+00:00
+   - Check Expiring Licenses: next run at 2026-01-23T08:00:00+00:00
+   - Send Invoice Reminders: next run at 2026-01-23T09:00:00+00:00
+ * Serving Flask app 'admin_server'
+ * Debug mode: on
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Admin Server                   ║
+╠═══════════════════════════════════════════════════════════════╣
+║  URL: http://0.0.0.0:3035                              ║
+║  Username: admin                                          ║
+║  Password: ****************              ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+✅ Background scheduler started
+   Scheduled jobs: 6
+   - Check Overdue Invoices: next run at 2026-01-22T17:31:32.278009+00:00
+   - Cleanup Expired Sessions: next run at 2026-01-22T20:31:32.278292+00:00
+   - Process Severely Overdue Invoices: next run at 2026-01-22T22:31:32.278184+00:00
+   - Cleanup Old Nonces: next run at 2026-01-23T03:00:00+00:00
+   - Check Expiring Licenses: next run at 2026-01-23T08:00:00+00:00
+   - Send Invoice Reminders: next run at 2026-01-23T09:00:00+00:00
+ * Serving Flask app 'admin_server'
+ * Debug mode: on
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Admin Server                   ║
+╠═══════════════════════════════════════════════════════════════╣
+║  URL: http://0.0.0.0:3035                              ║
+║  Username: admin                                          ║
+║  Password: *********************************              ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+✅ Background scheduler started
+   Scheduled jobs: 6
+   - Check Overdue Invoices: next run at 2026-01-22T18:13:05.873778+00:00
+   - Cleanup Expired Sessions: next run at 2026-01-22T21:13:05.874180+00:00
+   - Process Severely Overdue Invoices: next run at 2026-01-22T23:13:05.874014+00:00
+   - Cleanup Old Nonces: next run at 2026-01-23T03:00:00+00:00
+   - Check Expiring Licenses: next run at 2026-01-23T08:00:00+00:00
+   - Send Invoice Reminders: next run at 2026-01-23T09:00:00+00:00
+ * Serving Flask app 'admin_server'
+ * Debug mode: on
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Admin Server                   ║
+╠═══════════════════════════════════════════════════════════════╣
+║  URL: http://0.0.0.0:3035                              ║
+║  Username: admin                                          ║
+║  Password: ******************************************************************************************************************************************************************              ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+✅ Background scheduler started
+   Scheduled jobs: 6
+   - Check Overdue Invoices: next run at 2026-01-22T20:10:11.246915+00:00
+   - Cleanup Expired Sessions: next run at 2026-01-22T23:10:11.247211+00:00
+   - Process Severely Overdue Invoices: next run at 2026-01-23T01:10:11.247097+00:00
+   - Cleanup Old Nonces: next run at 2026-01-23T03:00:00+00:00
+   - Check Expiring Licenses: next run at 2026-01-23T08:00:00+00:00
+   - Send Invoice Reminders: next run at 2026-01-23T09:00:00+00:00
+ * Serving Flask app 'admin_server'
+ * Debug mode: on

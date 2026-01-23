@@ -1,0 +1,369 @@
+Metadata-Version: 2.4
+Name: owl-browser
+Version: 2.0.0
+Summary: Python SDK for Owl Browser automation - async-first with dynamic OpenAPI method generation
+Project-URL: Homepage, https://www.owlbrowser.net
+Project-URL: Documentation, https://docs.owlbrowser.net
+Project-URL: Repository, https://github.com/Olib-AI/olib-browser
+Author-email: Olib AI <support@olib.ai>
+License-Expression: MIT
+Keywords: antidetect,async,automation,browser,owl,testing,web-scraping
+Classifier: Development Status :: 4 - Beta
+Classifier: Framework :: AsyncIO
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Internet :: WWW/HTTP :: Browsers
+Classifier: Topic :: Software Development :: Testing
+Classifier: Typing :: Typed
+Requires-Python: >=3.12
+Requires-Dist: aiohttp>=3.9.0
+Requires-Dist: cryptography>=42.0.0
+Requires-Dist: pyjwt[crypto]>=2.8.0
+Provides-Extra: dev
+Requires-Dist: mypy>=1.8.0; extra == 'dev'
+Requires-Dist: pytest-asyncio>=0.23.0; extra == 'dev'
+Requires-Dist: pytest>=8.0.0; extra == 'dev'
+Requires-Dist: ruff>=0.2.0; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# Owl Browser Python SDK v2
+
+Async-first Python SDK for [Owl Browser](https://www.owlbrowser.net) automation with dynamic OpenAPI method generation and flow execution support.
+
+## Features
+
+- **Dynamic Method Generation**: Methods are automatically generated from the OpenAPI schema
+- **Async-First Design**: Built with asyncio for optimal performance
+- **Sync Wrappers**: Convenience methods for non-async code
+- **Flow Execution**: Execute test flows with variable resolution and expectations
+- **Type Safety**: Full type hints with Python 3.12+ features
+- **Connection Pooling**: Efficient HTTP connection management
+- **Retry Logic**: Automatic retries with exponential backoff
+
+## Installation
+
+```bash
+pip install owl-browser
+```
+
+For development:
+
+```bash
+pip install owl-browser[dev]
+```
+
+## Quick Start
+
+### Connection Modes
+
+The SDK supports two connection modes depending on your deployment:
+
+```python
+from owl_browser import OwlBrowser, RemoteConfig
+
+# Production (via nginx proxy) - this is the default
+# Uses /api prefix: https://your-domain.com/api/execute/...
+config = RemoteConfig(
+    url="https://your-domain.com",
+    token="your-token"
+)
+
+# Development (direct to http-server on port 8080)
+# No prefix: http://localhost:8080/execute/...
+config = RemoteConfig(
+    url="http://localhost:8080",
+    token="test-token",
+    api_prefix=""  # Empty string for direct connection
+)
+```
+
+### Async Usage (Recommended)
+
+```python
+import asyncio
+from owl_browser import OwlBrowser, RemoteConfig
+
+async def main():
+    config = RemoteConfig(
+        url="https://your-domain.com",
+        token="your-secret-token"
+    )
+
+    async with OwlBrowser(config) as browser:
+        # Create a browser context
+        ctx = await browser.create_context()
+        context_id = ctx["context_id"]
+
+        # Navigate to a page
+        await browser.navigate(context_id=context_id, url="https://example.com")
+
+        # Click an element
+        await browser.click(context_id=context_id, selector="button#submit")
+
+        # Take a screenshot
+        screenshot = await browser.screenshot(context_id=context_id)
+
+        # Extract text content
+        text = await browser.extract_text(context_id=context_id, selector="h1")
+        print(f"Page title: {text}")
+
+        # Close the context
+        await browser.close_context(context_id=context_id)
+
+asyncio.run(main())
+```
+
+### Sync Usage
+
+```python
+from owl_browser import OwlBrowser, RemoteConfig
+
+config = RemoteConfig(
+    url="http://localhost:8080",
+    token="your-secret-token"
+)
+
+browser = OwlBrowser(config)
+browser.connect_sync()
+
+# Execute tools synchronously
+ctx = browser.execute_sync("browser_create_context")
+browser.execute_sync("browser_navigate", context_id=ctx["context_id"], url="https://example.com")
+browser.execute_sync("browser_close_context", context_id=ctx["context_id"])
+
+browser.close_sync()
+```
+
+## Authentication
+
+### Bearer Token
+
+```python
+config = RemoteConfig(
+    url="http://localhost:8080",
+    token="your-secret-token"
+)
+```
+
+### JWT Authentication
+
+```python
+from owl_browser import RemoteConfig, AuthMode, JWTConfig
+
+config = RemoteConfig(
+    url="http://localhost:8080",
+    auth_mode=AuthMode.JWT,
+    jwt=JWTConfig(
+        private_key_path="/path/to/private.pem",
+        expires_in=3600,  # 1 hour
+        refresh_threshold=300,  # Refresh 5 minutes before expiry
+        issuer="my-app",
+        subject="user-123"
+    )
+)
+```
+
+## Flow Execution
+
+Execute test flows from JSON files (compatible with Owl Browser frontend format):
+
+```python
+from owl_browser import OwlBrowser, RemoteConfig
+from owl_browser.flow import FlowExecutor
+
+async def run_flow():
+    async with OwlBrowser(RemoteConfig(...)) as browser:
+        ctx = await browser.create_context()
+        executor = FlowExecutor(browser, ctx["context_id"])
+
+        # Load and execute a flow
+        flow = FlowExecutor.load_flow("test-flows/navigation.json")
+        result = await executor.execute(flow)
+
+        if result.success:
+            print(f"Flow completed in {result.total_duration_ms:.0f}ms")
+            for step in result.steps:
+                print(f"  [{step.step_index}] {step.tool_name}: {'OK' if step.success else 'FAIL'}")
+        else:
+            print(f"Flow failed: {result.error}")
+
+        await browser.close_context(context_id=ctx["context_id"])
+```
+
+### Flow JSON Format
+
+```json
+{
+  "name": "Navigation Test",
+  "description": "Test navigation tools",
+  "steps": [
+    {
+      "type": "browser_navigate",
+      "url": "https://example.com",
+      "selected": true,
+      "description": "Navigate to example.com"
+    },
+    {
+      "type": "browser_extract_text",
+      "selector": "h1",
+      "selected": true,
+      "expected": {
+        "contains": "Example"
+      }
+    }
+  ]
+}
+```
+
+### Variable Resolution
+
+Use `${prev}` to reference the previous step's result:
+
+```json
+{
+  "steps": [
+    {
+      "type": "browser_get_page_info",
+      "description": "Get page info"
+    },
+    {
+      "type": "browser_navigate",
+      "url": "${prev.url}/about",
+      "description": "Navigate to about page"
+    }
+  ]
+}
+```
+
+### Expectations
+
+Validate step results with expectations:
+
+```json
+{
+  "type": "browser_extract_text",
+  "selector": "#count",
+  "expected": {
+    "greaterThan": 0,
+    "field": "length"
+  }
+}
+```
+
+Supported expectations:
+- `equals`: Exact match
+- `contains`: String contains
+- `length`: Array/string length
+- `greaterThan`: Numeric comparison
+- `lessThan`: Numeric comparison
+- `notEmpty`: Not null/undefined/empty
+- `matches`: Regex pattern match
+- `field`: Nested field path (e.g., "data.count")
+
+## Available Tools
+
+Methods are dynamically generated from the server's OpenAPI schema. Common tools include:
+
+### Context Management
+- `create_context()` - Create a new browser context
+- `close_context(context_id)` - Close a context
+
+### Navigation
+- `navigate(context_id, url)` - Navigate to URL
+- `reload(context_id)` - Reload page
+- `go_back(context_id)` - Navigate back
+- `go_forward(context_id)` - Navigate forward
+
+### Interaction
+- `click(context_id, selector)` - Click element
+- `type(context_id, selector, text)` - Type text
+- `press_key(context_id, key)` - Press keyboard key
+
+### Content Extraction
+- `extract_text(context_id, selector)` - Extract text
+- `get_html(context_id)` - Get page HTML
+- `screenshot(context_id)` - Take screenshot
+
+### AI Features
+- `summarize_page(context_id)` - Summarize page content
+- `query_page(context_id, query)` - Ask questions about page
+- `solve_captcha(context_id)` - Solve CAPTCHA challenges
+
+Use `browser.list_tools()` to see all available tools.
+
+## Error Handling
+
+```python
+from owl_browser import (
+    OwlBrowserError,
+    ConnectionError,
+    AuthenticationError,
+    ToolExecutionError,
+    TimeoutError,
+)
+
+try:
+    async with OwlBrowser(config) as browser:
+        await browser.navigate(context_id="invalid", url="https://example.com")
+except AuthenticationError as e:
+    print(f"Authentication failed: {e}")
+except ToolExecutionError as e:
+    print(f"Tool {e.tool_name} failed: {e.message}")
+except TimeoutError as e:
+    print(f"Operation timed out: {e}")
+except ConnectionError as e:
+    print(f"Connection failed: {e}")
+```
+
+## Configuration Options
+
+```python
+from owl_browser import RemoteConfig, RetryConfig
+
+config = RemoteConfig(
+    url="https://your-domain.com",
+    token="secret",
+
+    # Timeout settings
+    timeout=30.0,  # seconds
+
+    # Concurrency
+    max_concurrent=10,
+
+    # Retry configuration
+    retry=RetryConfig(
+        max_retries=3,
+        initial_delay_ms=100,
+        max_delay_ms=10000,
+        backoff_multiplier=2.0,
+        jitter_factor=0.1
+    ),
+
+    # API prefix - determines URL structure for API calls
+    # Default: "/api" (production via nginx proxy)
+    # Set to "" for direct connection to http-server (development)
+    api_prefix="/api",
+
+    # SSL verification
+    verify_ssl=True
+)
+```
+
+## Requirements
+
+- Python 3.12+
+- aiohttp >= 3.9.0
+- pyjwt[crypto] >= 2.8.0
+- cryptography >= 42.0.0
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Links
+
+- Website: https://www.owlbrowser.net
+- Documentation: https://docs.owlbrowser.net
+- GitHub: https://github.com/Olib-AI/olib-browser

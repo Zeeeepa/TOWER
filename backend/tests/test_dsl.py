@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from autoqa.dsl.models import (
+from web2api.dsl.models import (
     TestSpec,
     TestSuite,
     TestStep,
@@ -17,9 +17,9 @@ from autoqa.dsl.models import (
     VisualAssertionConfig,
     VisualComparisonMode,
 )
-from autoqa.dsl.parser import DSLParser, DSLParseError
-from autoqa.dsl.validator import DSLValidator
-from autoqa.dsl.transformer import StepTransformer
+from web2api.dsl.parser import DSLParser, DSLParseError
+from web2api.dsl.validator import DSLValidator
+from web2api.dsl.transformer import StepTransformer
 
 
 class TestDSLModels:

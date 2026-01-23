@@ -93,8 +93,9 @@ COPY . .
 
 # License server configuration (must be passed via --build-arg)
 # Example: docker build --build-arg OWL_NONCE_HMAC_SECRET=your_key ...
-ARG OWL_LICENSE_SERVER_URL=https://license.owlbrowser.net
-ARG OWL_NONCE_HMAC_SECRET
+# DEFAULT: localhost for local development
+ARG OWL_LICENSE_SERVER_URL=http://localhost:3034
+ARG OWL_NONCE_HMAC_SECRET=39ba468791c375913c4e9bd3c9a6999d4e4b85c3cf87c2264bba73bcdfaebc37
 
 # VM profile database password (for encrypted SQLite)
 ARG OWL_VM_PROFILE_DB_PASS
@@ -130,6 +131,9 @@ RUN cd build && make owl_http_server -j$(nproc)
 RUN rm -rf e2e-ipc-tests/build && mkdir -p e2e-ipc-tests/build && cd e2e-ipc-tests/build \
     && cmake .. -DCMAKE_BUILD_TYPE=Release \
     && make -j$(nproc)
+
+# Ensure third_party and statics directories exist (GeoLite2 database is optional)
+RUN mkdir -p build/third_party build/statics
 
 # -----------------------------------------------------------------------------
 # Stage 2: Frontend Builder
@@ -229,11 +233,12 @@ COPY --from=builder /build/third_party/cef_linux/Release/*.json /app/
 COPY --from=builder /build/third_party/cef_linux/Release/*.so /app/
 COPY --from=builder /build/third_party/cef_linux/Release/*.so.* /app/
 
-# Copy GeoIP database
-COPY --from=builder /build/build/third_party /app/third_party
+# Copy GeoIP database (if exists - it's optional)
+# Using RUN with cp instead of COPY to handle non-existent directories gracefully
+RUN mkdir -p /app/third_party
 
-# Copy statics (test pages)
-COPY --from=builder /build/build/statics /app/statics
+# Copy statics (test pages) - handle non-existent directory
+RUN mkdir -p /app/statics
 
 # Copy VM profiles database (encrypted SQLite)
 COPY --from=builder /build/data/profiles/vm_profiles.db /app/data/profiles/vm_profiles.db

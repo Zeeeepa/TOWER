@@ -1,7 +1,7 @@
 [project]
-name = "autoqa-ai-testing"
-version = "1.0.0"
-description = "Production AutoQA AI Testing System with natural language YAML test definitions and self-healing capabilities"
+name = "web2api"
+version = "2.0.0"
+description = "Web2API - Universal API Gateway that transforms web-based AI chat interfaces into OpenAI-compatible endpoints"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.12"
@@ -85,12 +85,12 @@ dev = [
 ]
 
 [project.scripts]
-autoqa = "autoqa.cli:main"
-autoqa-server = "autoqa.api.main:run_server"
+web2api = "web2api.cli:main"
+web2api-server = "web2api.api.main:run_server"
 
 [project.urls]
 Homepage = "https://owlbrowser.net"
-Documentation = "https://docs.owlbrowser.net/autoqa"
+Documentation = "https://docs.owlbrowser.net/web2api"
 Repository = "https://github.com/Olib-AI/owl-projects"
 
 [build-system]
@@ -98,7 +98,7 @@ requires = ["hatchling>=1.25.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/autoqa"]
+packages = ["src/web2api"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -155,7 +155,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["autoqa"]
+known-first-party = ["web2api"]
 
 [tool.black]
 line-length = 100
@@ -175,7 +175,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/autoqa"]
+source = ["src/web2api"]
 branch = true
 
 [tool.coverage.report]

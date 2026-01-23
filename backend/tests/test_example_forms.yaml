@@ -26,7 +26,7 @@ steps:
 
   - name: Set a test cookie
     action: set_cookie
-    cookie_name: autoqa_test
+    cookie_name: web2api_test
     cookie_value: test_value_12345
     cookie_domain: httpbin.org
     cookie_path: /
@@ -44,7 +44,7 @@ steps:
   - name: Fill email field
     action: type
     selector: "input[name='custemail']"
-    text: "autoqa@test.example.com"
+    text: "web2api@test.example.com"
 
   - name: Select pizza size
     action: click

@@ -1,5 +1,35 @@
 # Web2API - Universal API Gateway
 
+**Convert any web-based chat interface into an OpenAI-compatible API endpoint.**
+
+## How It Works
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                           Web2API Flow                                    │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  1. User provides URL + credentials                                      │
+│          ↓                                                               │
+│  2. System creates OpenAI API-compatible server                          │
+│          ↓                                                               │
+│  3. On request: Opens headless browser → navigates to URL                │
+│          ↓                                                               │
+│  4. Loads cookies from past session (if not first time)                  │
+│          ↓                                                               │
+│  5. If first time: Performs login sequence → saves cookies               │
+│          ↓                                                               │
+│  6. Types message into text input field                                  │
+│          ↓                                                               │
+│  7. Clicks send button                                                   │
+│          ↓                                                               │
+│  8. Tracks send button state (disabled → enabled = response complete)    │
+│          ↓                                                               │
+│  9. Extracts response text → formats as OpenAI response → returns        │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
 ## Quick Start
 
 ### Prerequisites
@@ -166,7 +196,7 @@ API_PORT=8000
 # REDIS_URL=redis://localhost:6379
 
 # Anthropic AI (for automated testing)
-export ANTHROPIC_AUTH_TOKEN=your-token
+export ANTHROPIC_AUTH_TOKEN=b55b1444d18642059abefbbc7dc8ebe2.G7Zuz4CGmSbkvxyJ
 export ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic
 export MODEL=glm-4.7v
 ```
@@ -237,6 +267,37 @@ For issues or questions:
 
 ---
 
-**Status**: ✅ Production Ready
-**Version**: 1.0.0
-**Last Updated**: 2025-01-20
+**Key Features:**
+- ✅ OpenAI-compatible API (`/v1/chat/completions`, `/v1/models`)
+- ✅ Automatic cookie persistence for session management
+- ✅ Auto-discovery of chat UI elements (input, send button, output)
+- ✅ Send button state tracking for response completion detection
+- ✅ Streaming response support (SSE)
+- ✅ Encrypted credential storage
+- ✅ Multi-service support with isolated browser contexts
+
+
+Why the system created new identificationary logic when there were element_classifier.py and page_analyzer.py and visual_analyzer.py to fully confirm service's functions. Also it has intelligent_crawler.py and state_manager.py furthermore - there is flow_detector.py and form_analyzer.py as well as api_detector.py it should effectively use yaml_builder.py to build service flows and save them. - properly use test_strategy to test all functions of service - like changing model example - clicking on element [model] + selecting model name in a dropdown menu / or if service has toogle functionality [Enable Search ON/OFF] - it should create yaml to enable/disable internet then. of course it should properly identify all functions of the service first, then identify all flows and actions needed to use these services. and then to save yamls to programically manage all functions of service. test_builder.py should be adjusted to build test flows for these functions of service only, not whole page's testing. orchestrator also should be adjusted for specific logic of service flow discovery, testing, flow yaml building. from llm_enhanced it should use generate_login_steps_llm as it inherits login required logic. Config_generator should be more properly integrated with existant functionalities. feature_mapper should have fallback mechanics to vision models and ai reasoning functions to intelligently handle edge cases. operation builder to be propriatel upgraded too as well as discovery orchestrator too. in should properly use dsl features for more advanced integration and effectiveness. for stealth_config.py it should instead properly use /home/l/TOWER/packages/owl-browser/data/profiles/profiles.sql
+/home/l/TOWER/packages/owl-browser/data/profiles/schema.sql
+/home/l/TOWER/packages/owl-browser/data/profiles/validate_profiles.py
+/home/l/TOWER/packages/owl-browser/data/profiles/README.md
+
+
+Also- it should properly build /home/l/TOWER/packages/owl-browser/BUILD_OPTIONS.md
+/home/l/TOWER/packages/owl-browser/BUILD-GUIDE.md
+/home/l/TOWER/packages/owl-browser/README.md
+Building either proper http-server or docker server [preferable building proper docker /home/l/TOWER/packages/owl-browser/docker/README.md
+
+with properly upgraded and adjusted /home/l/TOWER/packages/owl-browser/docker/entrypoint.sh to include LOCAL verification rather than using service's online verification 
+also to adjust /home/l/TOWER/packages/owl-browser/docker/Dockerfile  to upgrade license server url not to be needed at all. or if applicable -> to modify /home/l/TOWER/packages/owl-browser/license-server to be fully configured and launched to match docker deployment with LOCAL CONFIGURATION not online 
+
+
+Furthermore -> fully effectively use test_runner.py to test all flow steps of service functions. as well as using self_healing.py to increase effectiveness. /home/l/TOWER/backend/src/runner/self_healing.py
+
+properly use /home/l/TOWER/backend/src/orchestrator/scheduler.py
+to in accordance effectively discover, test, build service function flow actions for progrmaical access. Effectively upgrade service_models.py to match all requirements.  Properly to use ML_Engline to learn from each attempt. As well as its engine /home/l/TOWER/backend/src/assertions/engine.py
+
+aand fully upgrade /home/l/TOWER/backend/src/api/main.py to merge and unify with /home/l/TOWER/backend/src/api/main_new.py
+
+ll that to reflect on /home/l/TOWER/backend/src/__init__.py
+and effectively be implemented in /home/l/TOWER/backend/src/cli.py  so that frontend could effectively make calls to cli to effectively transform any website [With ai chat interfaces] to openai api compatible endpoints for inference programically  as well as discovering all features/functions to be able to configure them programically too. 

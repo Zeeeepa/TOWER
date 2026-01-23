@@ -74,7 +74,7 @@ Comprehensive technical reference for the AutoQA AI Testing System.
 ## Module Structure
 
 ```
-src/autoqa/
+src/web2api/
 ├── __init__.py              # Package exports
 ├── cli.py                   # CLI entry point (Click-based)
 │
@@ -152,7 +152,7 @@ The Builder module automatically generates YAML test specifications from web pag
 Main orchestration layer coordinating all analysis and generation components.
 
 ```python
-from autoqa.builder import TestBuilderOrchestrator, OrchestratorConfig
+from web2api.builder import TestBuilderOrchestrator, OrchestratorConfig
 
 config = OrchestratorConfig(
     mode=BuildMode.STANDARD,      # quick, standard, deep, targeted
@@ -183,7 +183,7 @@ result = await orchestrator.build("https://example.com")
 Simpler, synchronous builder for basic use cases.
 
 ```python
-from autoqa.builder import AutoTestBuilder, BuilderConfig
+from web2api.builder import AutoTestBuilder, BuilderConfig
 
 config = BuilderConfig(
     url="https://example.com",
@@ -204,7 +204,7 @@ yaml_content = builder.build()
 Deep DOM analysis with component detection.
 
 ```python
-from autoqa.builder.analyzer import PageAnalyzer, AnalyzerConfig
+from web2api.builder.analyzer import PageAnalyzer, AnalyzerConfig
 
 analyzer = PageAnalyzer(config=AnalyzerConfig(
     include_hidden=False,
@@ -228,7 +228,7 @@ analysis = await analyzer.analyze(html, url)
 ML-based element classification.
 
 ```python
-from autoqa.builder.analyzer import ElementClassifier, ClassifierConfig
+from web2api.builder.analyzer import ElementClassifier, ClassifierConfig
 
 classifier = ElementClassifier(config=ClassifierConfig(
     use_ml_classification=True,
@@ -253,7 +253,7 @@ result = await classifier.classify({
 Visual/UI analysis for layout, accessibility, responsiveness.
 
 ```python
-from autoqa.builder.analyzer import VisualAnalyzer, VisualConfig
+from web2api.builder.analyzer import VisualAnalyzer, VisualConfig
 
 analyzer = VisualAnalyzer(config=VisualConfig(
     detect_layout=True,
@@ -272,7 +272,7 @@ result = await analyzer.analyze(screenshot_bytes, html)
 Smart same-domain crawling with priority queue.
 
 ```python
-from autoqa.builder.crawler import IntelligentCrawler, CrawlConfig
+from web2api.builder.crawler import IntelligentCrawler, CrawlConfig
 
 crawler = IntelligentCrawler(
     browser=browser,
@@ -295,7 +295,7 @@ result = await crawler.crawl("https://example.com")
 Application state tracking for flow detection.
 
 ```python
-from autoqa.builder.crawler import StateManager, StateConfig
+from web2api.builder.crawler import StateManager, StateConfig
 
 manager = StateManager(config=StateConfig(
     track_url_state=True,
@@ -314,7 +314,7 @@ transitions = manager.get_state_transitions()
 Detect user flows (login, registration, checkout, search, CRUD).
 
 ```python
-from autoqa.builder.discovery import FlowDetector, FlowConfig, FlowType
+from web2api.builder.discovery import FlowDetector, FlowConfig, FlowType
 
 detector = FlowDetector(config=FlowConfig(
     detect_login=True,
@@ -338,7 +338,7 @@ flows = await detector.detect_from_page(html, url, elements)
 Detect API calls (REST, GraphQL).
 
 ```python
-from autoqa.builder.discovery import APIDetector, APIConfig
+from web2api.builder.discovery import APIDetector, APIConfig
 
 detector = APIDetector(config=APIConfig(
     detect_rest=True,
@@ -357,7 +357,7 @@ endpoints = await detector.stop_monitoring()
 Deep form analysis with validation rule inference.
 
 ```python
-from autoqa.builder.discovery import FormAnalyzer, FormConfig
+from web2api.builder.discovery import FormAnalyzer, FormConfig
 
 analyzer = FormAnalyzer(config=FormConfig(
     infer_validation_rules=True,
@@ -381,7 +381,7 @@ forms = await analyzer.analyze(html)
 Risk-based test prioritization and planning.
 
 ```python
-from autoqa.builder.generator import TestStrategy, StrategyConfig
+from web2api.builder.generator import TestStrategy, StrategyConfig
 
 strategy = TestStrategy(config=StrategyConfig(
     prioritize_critical_flows=True,
@@ -399,7 +399,7 @@ plan = await strategy.generate_plan(analysis_data, scope="full")
 Generate appropriate assertions.
 
 ```python
-from autoqa.builder.generator import AssertionGenerator, AssertionConfig
+from web2api.builder.generator import AssertionGenerator, AssertionConfig
 
 generator = AssertionGenerator(config=AssertionConfig(
     include_visibility=True,
@@ -417,7 +417,7 @@ assertions = await generator.generate_for_page(url, elements, visual_data)
 Construct YAML test specifications.
 
 ```python
-from autoqa.builder.generator import YAMLBuilder, BuilderConfig
+from web2api.builder.generator import YAMLBuilder, BuilderConfig
 
 builder = YAMLBuilder(config=BuilderConfig(
     include_comments=True,
@@ -440,7 +440,7 @@ The Runner module executes YAML test specifications.
 Main test execution engine.
 
 ```python
-from autoqa.runner import TestRunner
+from web2api.runner import TestRunner
 
 runner = TestRunner(
     browser=browser,
@@ -489,7 +489,7 @@ result = runner.run_spec(spec, variables={"base_url": "https://example.com"})
 Deterministic selector recovery (no AI/LLM required).
 
 ```python
-from autoqa.runner import SelfHealingEngine
+from web2api.runner import SelfHealingEngine
 
 engine = SelfHealingEngine(
     history_path="./healing_history.json",
@@ -574,7 +574,7 @@ Optional LLM integration for enhanced test generation and assertions.
 ### Configuration
 
 ```python
-from autoqa.llm import LLMConfig, LLMProvider, load_llm_config
+from web2api.llm import LLMConfig, LLMProvider, load_llm_config
 
 config = load_llm_config()  # Loads from environment/config file
 
@@ -603,7 +603,7 @@ config = LLMConfig(
 Singleton service for LLM operations.
 
 ```python
-from autoqa.llm import get_llm_service, LLMResult
+from web2api.llm import get_llm_service, LLMResult
 
 service = get_llm_service()
 
@@ -620,7 +620,7 @@ if result.success:
 ### LLM Assertions
 
 ```python
-from autoqa.llm import LLMAssertionEngine
+from web2api.llm import LLMAssertionEngine
 
 engine = LLMAssertionEngine(page)
 
@@ -647,7 +647,7 @@ result = await engine.assert_content_valid(
 ### Prompt Templates
 
 ```python
-from autoqa.llm import get_prompt, format_prompt, PromptType
+from web2api.llm import get_prompt, format_prompt, PromptType
 
 # Get predefined prompt
 prompt = get_prompt(PromptType.TEST_GENERATION)
@@ -671,7 +671,7 @@ Parallel test execution with resource management.
 Efficient browser context pooling.
 
 ```python
-from autoqa.concurrency import BrowserPool, ConcurrencyConfig
+from web2api.concurrency import BrowserPool, ConcurrencyConfig
 
 config = ConcurrencyConfig(
     max_parallel_tests=5,
@@ -700,7 +700,7 @@ async with BrowserPool(browser, config) as pool:
 Parallel test execution with concurrency control.
 
 ```python
-from autoqa.concurrency import AsyncTestRunner, ParallelExecutionResult
+from web2api.concurrency import AsyncTestRunner, ParallelExecutionResult
 
 async with AsyncTestRunner(browser, config) as runner:
     result: ParallelExecutionResult = await runner.run_tests(
@@ -724,7 +724,7 @@ result = runner.run_tests_sync(specs, variables)
 Memory-aware scaling.
 
 ```python
-from autoqa.concurrency import ResourceMonitor, MemoryPressure
+from web2api.concurrency import ResourceMonitor, MemoryPressure
 
 monitor = ResourceMonitor(
     config,

@@ -416,11 +416,11 @@ Default credentials:
 The license server URL is configured in `.env`:
 
 ```env
-# Development (localhost)
+# Development (localhost - DEFAULT)
 OLIB_LICENSE_SERVER_URL=http://localhost:3034
 
 # Production (replace with your domain)
-OLIB_LICENSE_SERVER_URL=https://license.owlbrowser.net
+# OLIB_LICENSE_SERVER_URL=https://license.yourdomain.com
 ```
 
 CMake reads this value and compiles it into the browser binary.
@@ -445,6 +445,9 @@ OLIB_DB_PASSWORD=your-secure-password
 
 OLIB_ADMIN_PASSWORD_HASH=pbkdf2:sha256:...
 OLIB_ADMIN_SECRET_KEY=your-random-secret-key
+
+# Change URL for production
+OLIB_LICENSE_SERVER_URL=https://license.yourdomain.com
 ```
 
 Run with a production WSGI server:

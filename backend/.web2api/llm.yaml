@@ -1,0 +1,73 @@
+# ==============================================================================
+# AutoQA LLM Configuration - Z.AI Vision Model
+# ==============================================================================
+# This configures glm-4.6v (z.ai) as the BACKEND'S INTERNAL "BRAIN" for:
+#   1. Visual inspection during service discovery
+#   2. Building programmatic YAML flows
+#   3. Debugging and self-healing when errors occur
+#
+# IMPORTANT: glm-4.6v is NOT used for actual user inference requests!
+# User inference goes through discovered services (like k2think.ai) directly.
+# ==============================================================================
+
+# Enable LLM features for backend operations
+enabled: true
+
+# Z.AI Vision Model Configuration
+default_endpoint:
+  # Z.AI OpenAI-compatible API endpoint
+  base_url: "https://api.z.ai/api/openai/v1"
+  # api_key is loaded from AUTOQA_LLM_API_KEY environment variable
+  model: "glm-4.6v"
+  provider: "custom"  # OpenAI-compatible custom endpoint
+  
+  # Request parameters optimized for visual analysis
+  temperature: 0.2  # Lower temperature for precise analysis
+  max_tokens: 4096  # Larger context for visual inspection results
+  timeout_ms: 60000  # Vision models may take longer
+
+  # Retry configuration for robustness
+  retry:
+    max_retries: 3
+    initial_delay_ms: 1000
+    max_delay_ms: 30000
+    exponential_base: 2.0
+    jitter: true
+
+  # Rate limiting for z.ai API
+  rate_limit:
+    requests_per_minute: 30  # Conservative rate limit
+    tokens_per_minute: 60000
+    concurrent_requests: 3
+
+# ==============================================================================
+# Per-Tool Configuration
+# ==============================================================================
+# These tools use glm-4.6v for backend operations ONLY
+
+# Test Builder: Uses vision model to analyze UI and generate test flows
+test_builder:
+  enabled: true
+  temperature: 0.3  # Slightly creative for test generation
+
+# Step Transformer: Converts natural language to browser actions
+step_transformer:
+  enabled: true
+  temperature: 0.2  # Precise action generation
+
+# Assertions: LLM-based semantic validation of responses
+assertions:
+  enabled: true
+  temperature: 0.1  # Very precise for validation
+
+# Self-Healing: Uses vision model to debug and fix selectors/flows
+# CRITICAL: This is activated only when errors occur
+self_healing:
+  enabled: true
+  temperature: 0.3
+  max_tokens: 8192  # More context for debugging complex issues
+
+# Chaos Agents: Generative testing (disabled by default)
+chaos_agents:
+  enabled: false
+  temperature: 0.7

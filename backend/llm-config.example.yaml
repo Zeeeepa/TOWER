@@ -1,5 +1,5 @@
 # AutoQA LLM Configuration Example
-# Copy this file to .autoqa/llm.yaml and customize for your environment
+# Copy this file to .web2api/llm.yaml and customize for your environment
 #
 # Environment variables can also be used:
 #   AUTOQA_LLM_ENABLED=true

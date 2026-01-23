@@ -1,0 +1,182 @@
+# ==============================================================================
+# TOWER Web2API - Complete Development Stack
+# ==============================================================================
+# This docker-compose file sets up the entire development environment:
+#   - PostgreSQL database
+#   - Local license server (bypasses online verification)
+#   - Owl-browser server with HTTP/WebSocket API
+#   - Backend API server
+#
+# Quick Start:
+#   docker-compose up -d
+#
+# With build:
+#   docker-compose up -d --build
+#
+# View logs:
+#   docker-compose logs -f
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # PostgreSQL Database
+  # ==========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: tower-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: web2api
+      POSTGRES_PASSWORD: web2api123
+      POSTGRES_DB: web2api
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U web2api -d web2api"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================================================
+  # Local License Server (Development Mode)
+  # ==========================================================================
+  license-server:
+    build:
+      context: ./packages/owl-browser/license-server
+      dockerfile: Dockerfile
+    container_name: tower-license-server
+    restart: unless-stopped
+    environment:
+      # Database (SQLite for simplicity in dev)
+      OLIB_DB_TYPE: sqlite
+      # Admin settings
+      OLIB_ADMIN_PORT: "3035"
+      OLIB_ADMIN_USERNAME: admin
+      OLIB_ADMIN_SECRET_KEY: local-dev-secret-key-not-for-production
+      # License API settings
+      OLIB_LICENSE_SERVER_PORT: "3034"
+      OWL_NONCE_HMAC_SECRET: local-dev-hmac-secret-for-testing
+      # Development mode - auto-generate keys
+      GENERATE_KEYS: "true"
+      DEV_LICENSE_MODE: "true"
+      ALLOW_ANY_FINGERPRINT: "true"
+    ports:
+      - "3034:3034"  # License API
+      - "3035:3035"  # Admin panel
+    volumes:
+      - license-data:/app/data
+      - license-keys:/app/keys
+
+  # ==========================================================================
+  # Owl-Browser Server
+  # ==========================================================================
+  owl-browser:
+    build:
+      context: ./packages/owl-browser
+      dockerfile: docker/Dockerfile
+      args:
+        OWL_LICENSE_SERVER_URL: http://license-server:3034
+        OWL_NONCE_HMAC_SECRET: local-dev-hmac-secret-for-testing
+        OWL_VM_PROFILE_DB_PASS: local-dev-profile-db-password
+    container_name: tower-owl-browser
+    restart: unless-stopped
+    depends_on:
+      license-server:
+        condition: service_started
+    environment:
+      # HTTP Server settings
+      OWL_HTTP_HOST: "0.0.0.0"
+      OWL_HTTP_PORT: "8080"
+      OWL_HTTP_TOKEN: tower-dev-token
+      OWL_PANEL_PASSWORD: tower-dev-password
+      # Development mode
+      OWL_DEV_MODE: "true"
+      # License server (internal network)
+      OWL_LICENSE_SERVER_URL: http://license-server:3034
+    ports:
+      - "80:80"      # Web control panel
+      - "8080:8080"  # HTTP API (direct)
+    shm_size: 2gb
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - owl-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ==========================================================================
+  # Backend API Server
+  # ==========================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tower-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      owl-browser:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgresql+asyncpg://web2api:web2api123@postgres:5432/web2api
+      # Owl-Browser connection (internal network)
+      OWL_BROWSER_URL: ws://owl-browser:8080
+      OWL_HTTP_URL: http://owl-browser:8080
+      OWL_BROWSER_TOKEN: tower-dev-token
+      # Encryption
+      CREDENTIAL_ENCRYPTION_KEY: tower-encryption-key-change-in-production
+      # API settings
+      CORS_ORIGINS: "*"
+      API_HOST: "0.0.0.0"
+      API_PORT: "8000"
+      # Z.AI Vision Model (Backend's Internal "Brain")
+      AUTOQA_LLM_ENABLED: "true"
+      AUTOQA_LLM_API_KEY: 
+      AUTOQA_LLM_BASE_URL: https://api.z.ai/api/openai/v1
+      AUTOQA_LLM_MODEL: glm-4.6v
+      AUTOQA_LLM_TEST_BUILDER_ENABLED: "true"
+      AUTOQA_LLM_STEP_TRANSFORMER_ENABLED: "true"
+      AUTOQA_LLM_ASSERTIONS_ENABLED: "true"
+      AUTOQA_LLM_SELF_HEALING_ENABLED: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/src:/app/src:ro
+      - ./backend/.web2api:/app/.web2api:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+# ==============================================================================
+# Volumes
+# ==============================================================================
+volumes:
+  postgres-data:
+    driver: local
+  license-data:
+    driver: local
+  license-keys:
+    driver: local
+  owl-data:
+    driver: local
+
+# ==============================================================================
+# Networks
+# ==============================================================================
+networks:
+  default:
+    name: tower-network
+    driver: bridge

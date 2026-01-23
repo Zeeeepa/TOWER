@@ -1,0 +1,139 @@
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Subscription Server            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Listening on: http://0.0.0.0:3034                      ║
+║  Database: SQLite (license-server/data/licenses.db)           ║
+║                                                               ║
+║  Endpoints:                                                   ║
+║    GET  /api/v1/health              - Health check            ║
+║    POST /api/v1/license/activate    - Activate ANY license    ║
+║    POST /api/v1/subscription/check  - Check subscription      ║
+║    GET  /api/v1/license/info        - Get license info        ║
+║                                                               ║
+║  All responses are RSA-signed for security                    ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+ * Serving Flask app 'subscription_server'
+ * Debug mode: on
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Subscription Server            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Listening on: http://0.0.0.0:3034                      ║
+║  Database: SQLite (license-server/data/licenses.db)           ║
+║                                                               ║
+║  Endpoints:                                                   ║
+║    GET  /api/v1/health              - Health check            ║
+║    POST /api/v1/license/activate    - Activate ANY license    ║
+║    POST /api/v1/subscription/check  - Check subscription      ║
+║    GET  /api/v1/license/info        - Get license info        ║
+║                                                               ║
+║  All responses are RSA-signed for security                    ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Subscription Server            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Listening on: http://0.0.0.0:3034                      ║
+║  Database: SQLite (license-server/data/licenses.db)           ║
+║                                                               ║
+║  Endpoints:                                                   ║
+║    GET  /api/v1/health              - Health check            ║
+║    POST /api/v1/license/activate    - Activate ANY license    ║
+║    POST /api/v1/subscription/check  - Check subscription      ║
+║    GET  /api/v1/license/info        - Get license info        ║
+║                                                               ║
+║  All responses are RSA-signed for security                    ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+ * Serving Flask app 'subscription_server'
+ * Debug mode: on
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Subscription Server            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Listening on: http://0.0.0.0:3034                      ║
+║  Database: SQLite (license-server/data/licenses.db)           ║
+║                                                               ║
+║  Endpoints:                                                   ║
+║    GET  /api/v1/health              - Health check            ║
+║    POST /api/v1/license/activate    - Activate ANY license    ║
+║    POST /api/v1/subscription/check  - Check subscription      ║
+║    GET  /api/v1/license/info        - Get license info        ║
+║                                                               ║
+║  All responses are RSA-signed for security                    ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Subscription Server            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Listening on: http://0.0.0.0:3034                      ║
+║  Database: SQLite (license-server/data/licenses.db)           ║
+║                                                               ║
+║  Endpoints:                                                   ║
+║    GET  /api/v1/health              - Health check            ║
+║    POST /api/v1/license/activate    - Activate ANY license    ║
+║    POST /api/v1/subscription/check  - Check subscription      ║
+║    GET  /api/v1/license/info        - Get license info        ║
+║                                                               ║
+║  All responses are RSA-signed for security                    ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+ * Serving Flask app 'subscription_server'
+ * Debug mode: on
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Subscription Server            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Listening on: http://0.0.0.0:3034                      ║
+║  Database: SQLite (license-server/data/licenses.db)           ║
+║                                                               ║
+║  Endpoints:                                                   ║
+║    GET  /api/v1/health              - Health check            ║
+║    POST /api/v1/license/activate    - Activate ANY license    ║
+║    POST /api/v1/subscription/check  - Check subscription      ║
+║    GET  /api/v1/license/info        - Get license info        ║
+║                                                               ║
+║  All responses are RSA-signed for security                    ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+Error in activation: insert or update on table "activation_logs" violates foreign key constraint "activation_logs_license_id_fkey"
+DETAIL:  Key (license_id)=(432fb495-9e03-43f5-81a0-a6f764a224eb) is not present in table "licenses".
+
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Subscription Server            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Listening on: http://0.0.0.0:3034                      ║
+║  Database: SQLite (license-server/data/licenses.db)           ║
+║                                                               ║
+║  Endpoints:                                                   ║
+║    GET  /api/v1/health              - Health check            ║
+║    POST /api/v1/license/activate    - Activate ANY license    ║
+║    POST /api/v1/subscription/check  - Check subscription      ║
+║    GET  /api/v1/license/info        - Get license info        ║
+║                                                               ║
+║  All responses are RSA-signed for security                    ║
+╚═══════════════════════════════════════════════════════════════╝
+    
+ * Serving Flask app 'subscription_server'
+ * Debug mode: on
+
+╔═══════════════════════════════════════════════════════════════╗
+║           Owl Browser License Subscription Server            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  Listening on: http://0.0.0.0:3034                      ║
+║  Database: SQLite (license-server/data/licenses.db)           ║
+║                                                               ║
+║  Endpoints:                                                   ║
+║    GET  /api/v1/health              - Health check            ║
+║    POST /api/v1/license/activate    - Activate ANY license    ║
+║    POST /api/v1/subscription/check  - Check subscription      ║
+║    GET  /api/v1/license/info        - Get license info        ║
+║                                                               ║
+║  All responses are RSA-signed for security                    ║
+╚═══════════════════════════════════════════════════════════════╝
+    

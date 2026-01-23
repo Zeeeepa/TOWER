@@ -73,7 +73,10 @@ Create a `.env.build` file (DO NOT commit this file):
 
 ```bash
 # .env.build
-OWL_LICENSE_SERVER_URL=https://license.owlbrowser.net
+# For local development:
+OWL_LICENSE_SERVER_URL=http://localhost:3034
+# For production, use your own domain:
+# OWL_LICENSE_SERVER_URL=https://license.yourdomain.com
 OWL_NONCE_HMAC_SECRET=your-hmac-secret-here
 OWL_VM_PROFILE_DB_PASS=your-database-password-here
 ```
@@ -85,8 +88,9 @@ OWL_VM_PROFILE_DB_PASS=your-database-password-here
 cd /path/to/olib-browser
 
 # Build the image (this takes 10-20 minutes)
+# For production, replace the URL with your license server domain
 docker build \
-  --build-arg OWL_LICENSE_SERVER_URL=https://license.owlbrowser.net \
+  --build-arg OWL_LICENSE_SERVER_URL=https://license.yourdomain.com \
   --build-arg OWL_NONCE_HMAC_SECRET=your-hmac-secret \
   --build-arg OWL_VM_PROFILE_DB_PASS=your-db-password \
   -t olib-browser:latest \

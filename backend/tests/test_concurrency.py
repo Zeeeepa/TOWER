@@ -17,13 +17,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from autoqa.concurrency.config import (
+from web2api.concurrency.config import (
     ConcurrencyConfig,
     ResourceLimits,
     ScalingStrategy,
     load_concurrency_config,
 )
-from autoqa.concurrency.resource_monitor import (
+from web2api.concurrency.resource_monitor import (
     MemoryPressure,
     ResourceMonitor,
     ResourceSnapshot,
@@ -330,7 +330,7 @@ class TestMockBrowserPool:
     @pytest.mark.asyncio
     async def test_pool_creation(self, mock_browser: MagicMock) -> None:
         """Test browser pool initialization."""
-        from autoqa.concurrency.browser_pool import BrowserPool
+        from web2api.concurrency.browser_pool import BrowserPool
 
         config = ConcurrencyConfig(
             min_browser_contexts=2,
@@ -350,7 +350,7 @@ class TestMockBrowserPool:
     @pytest.mark.asyncio
     async def test_context_acquisition(self, mock_browser: MagicMock) -> None:
         """Test acquiring and releasing contexts."""
-        from autoqa.concurrency.browser_pool import BrowserPool
+        from web2api.concurrency.browser_pool import BrowserPool
 
         config = ConcurrencyConfig(
             min_browser_contexts=1,
@@ -368,7 +368,7 @@ class TestMockBrowserPool:
     @pytest.mark.asyncio
     async def test_multiple_acquisitions(self, mock_browser: MagicMock) -> None:
         """Test acquiring multiple contexts concurrently."""
-        from autoqa.concurrency.browser_pool import BrowserPool
+        from web2api.concurrency.browser_pool import BrowserPool
 
         config = ConcurrencyConfig(
             min_browser_contexts=1,
@@ -399,7 +399,7 @@ class TestMockBrowserPool:
     @pytest.mark.asyncio
     async def test_pool_statistics(self, mock_browser: MagicMock) -> None:
         """Test pool statistics tracking."""
-        from autoqa.concurrency.browser_pool import BrowserPool
+        from web2api.concurrency.browser_pool import BrowserPool
 
         config = ConcurrencyConfig(
             min_browser_contexts=1,
@@ -432,7 +432,7 @@ class TestAsyncTestRunnerMocked:
     @pytest.fixture
     def mock_test_spec(self) -> MagicMock:
         """Create a mock test spec."""
-        from autoqa.dsl.models import TestSpec, TestStep
+        from web2api.dsl.models import TestSpec, TestStep
 
         spec = MagicMock(spec=TestSpec)
         spec.name = "Mock Test"
@@ -448,7 +448,7 @@ class TestAsyncTestRunnerMocked:
     @pytest.mark.asyncio
     async def test_runner_lifecycle(self, mock_browser: MagicMock) -> None:
         """Test runner start and stop."""
-        from autoqa.concurrency.runner import AsyncTestRunner
+        from web2api.concurrency.runner import AsyncTestRunner
 
         config = ConcurrencyConfig(
             max_parallel_tests=2,
@@ -469,7 +469,7 @@ class TestAsyncTestRunnerMocked:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_browser: MagicMock) -> None:
         """Test async context manager usage."""
-        from autoqa.concurrency.runner import AsyncTestRunner
+        from web2api.concurrency.runner import AsyncTestRunner
 
         config = ConcurrencyConfig(enable_resource_monitoring=False)
 

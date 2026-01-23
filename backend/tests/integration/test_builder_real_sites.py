@@ -23,7 +23,7 @@ import pytest
 import yaml
 
 # Import the legacy builder config which has `url` parameter
-from autoqa.builder.test_builder import (
+from web2api.builder.test_builder import (
     AutoTestBuilder,
     BuilderConfig as LegacyBuilderConfig,
 )

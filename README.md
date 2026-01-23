@@ -21,33 +21,33 @@
 ### 1.1 Authentication & Login Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
-| `browser_detect_captcha` | Detect CAPTCHA during login | `autoqa/builder/discovery/form_analyzer.py` |
+| `browser_detect_captcha` | Detect CAPTCHA during login | `web2api/builder/discovery/form_analyzer.py` |
 | `browser_classify_captcha` | Classify CAPTCHA type | NEW: `auth/captcha_handler.py` |
 | `browser_solve_text_captcha` | Solve text-based CAPTCHAs | NEW: `auth/captcha_handler.py` |
 | `browser_solve_image_captcha` | Solve image-based CAPTCHAs | NEW: `auth/captcha_handler.py` |
 | `browser_solve_captcha` | Universal CAPTCHA solver | NEW: `auth/captcha_handler.py` |
-| `browser_find_element` | Find login forms, buttons | `autoqa/builder/discovery/form_analyzer.py` |
+| `browser_find_element` | Find login forms, buttons | `web2api/builder/discovery/form_analyzer.py` |
 | `browser_get_cookies` | Extract session cookies after login | NEW: `auth/session_manager.py` |
 | `browser_set_cookie` | Restore saved session | NEW: `auth/session_manager.py` |
 ### 1.2 Feature Discovery Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
-| `browser_ai_analyze` | AI-powered page analysis | `autoqa/builder/analyzer/visual_analyzer.py` |
-| `browser_query_page` | Query page capabilities | `autoqa/builder/analyzer/page_analyzer.py` |
-| `browser_screenshot` | Capture UI for vision models | `autoqa/builder/analyzer/visual_analyzer.py` |
-| `browser_get_html` | Extract DOM structure | `autoqa/builder/analyzer/page_analyzer.py` |
-| `browser_get_markdown` | Extract content as markdown | `autoqa/builder/analyzer/page_analyzer.py` |
-| `browser_extract_text` | Extract visible text | `autoqa/builder/analyzer/page_analyzer.py` |
+| `browser_ai_analyze` | AI-powered page analysis | `web2api/builder/analyzer/visual_analyzer.py` |
+| `browser_query_page` | Query page capabilities | `web2api/builder/analyzer/page_analyzer.py` |
+| `browser_screenshot` | Capture UI for vision models | `web2api/builder/analyzer/visual_analyzer.py` |
+| `browser_get_html` | Extract DOM structure | `web2api/builder/analyzer/page_analyzer.py` |
+| `browser_get_markdown` | Extract content as markdown | `web2api/builder/analyzer/page_analyzer.py` |
+| `browser_extract_text` | Extract visible text | `web2api/builder/analyzer/page_analyzer.py` |
 ### 1.3 Execution & Response Detection Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
 | `browser_is_enabled` | **CRITICAL**: Detect when "Send" button re-enables (response complete) | MODIFY: `runner/test_runner.py` → `execution/operation_runner.py` |
 | `browser_ai_extract` | Extract response from chat interface | MODIFY: `runner/test_runner.py` → `execution/operation_runner.py` |
 | `browser_extract_text` | Extract text content | MODIFY: `runner/test_runner.py` → `execution/operation_runner.py` |
-| `browser_click` | Click buttons, submit forms | `autoqa/concurrency/browser_pool.py` |
-| `browser_type` | Fill input fields | `autoqa/concurrency/browser_pool.py` |
+| `browser_click` | Click buttons, submit forms | `web2api/concurrency/browser_pool.py` |
+| `browser_type` | Fill input fields | `web2api/concurrency/browser_pool.py` |
 | `browser_upload_file` | Upload files for services that support it | MODIFY: `runner/test_runner.py` |
-| `browser_select_option` | Select dropdown options | `autoqa/concurrency/browser_pool.py` |
+| `browser_select_option` | Select dropdown options | `web2api/concurrency/browser_pool.py` |
 ### 1.4 Live Viewport & Recording Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
@@ -74,43 +74,43 @@
 ### 1.6 Navigation & State Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
-| `browser_navigate` | Navigate to service URL | `autoqa/concurrency/browser_pool.py` |
-| `browser_reload` | Reload page | `autoqa/concurrency/browser_pool.py` |
-| `browser_go_back` | Go back in history | `autoqa/concurrency/browser_pool.py` |
-| `browser_go_forward` | Go forward in history | `autoqa/concurrency/browser_pool.py` |
-| `browser_wait_for_selector` | Wait for elements | `autoqa/concurrency/browser_pool.py` |
-| `browser_wait_for_navigation` | Wait for page load | `autoqa/concurrency/browser_pool.py` |
+| `browser_navigate` | Navigate to service URL | `web2api/concurrency/browser_pool.py` |
+| `browser_reload` | Reload page | `web2api/concurrency/browser_pool.py` |
+| `browser_go_back` | Go back in history | `web2api/concurrency/browser_pool.py` |
+| `browser_go_forward` | Go forward in history | `web2api/concurrency/browser_pool.py` |
+| `browser_wait_for_selector` | Wait for elements | `web2api/concurrency/browser_pool.py` |
+| `browser_wait_for_navigation` | Wait for page load | `web2api/concurrency/browser_pool.py` |
 ### 1.7 Element Inspection Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
-| `browser_get_element_count` | Count elements | `autoqa/builder/analyzer/page_analyzer.py` |
-| `browser_get_element_text` | Get element text | `autoqa/builder/analyzer/page_analyzer.py` |
-| `browser_get_element_html` | Get element HTML | `autoqa/builder/analyzer/page_analyzer.py` |
-| `browser_get_element_attribute` | Get attributes | `autoqa/builder/analyzer/page_analyzer.py` |
-| `browser_is_visible` | Check element visibility | `autoqa/builder/analyzer/page_analyzer.py` |
-| `browser_is_hidden` | Check if hidden | `autoqa/builder/analyzer/page_analyzer.py` |
+| `browser_get_element_count` | Count elements | `web2api/builder/analyzer/page_analyzer.py` |
+| `browser_get_element_text` | Get element text | `web2api/builder/analyzer/page_analyzer.py` |
+| `browser_get_element_html` | Get element HTML | `web2api/builder/analyzer/page_analyzer.py` |
+| `browser_get_element_attribute` | Get attributes | `web2api/builder/analyzer/page_analyzer.py` |
+| `browser_is_visible` | Check element visibility | `web2api/builder/analyzer/page_analyzer.py` |
+| `browser_is_hidden` | Check if hidden | `web2api/builder/analyzer/page_analyzer.py` |
 ### 1.8 Form & Input Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
 | `browser_fill_form` | Auto-fill login forms | MODIFY: `builder/discovery/form_analyzer.py` → `auth/form_filler.py` |
-| `browser_check` | Check checkboxes | `autoqa/concurrency/browser_pool.py` |
-| `browser_uncheck` | Uncheck checkboxes | `autoqa/concurrency/browser_pool.py` |
-| `browser_hover` | Hover over elements | `autoqa/concurrency/browser_pool.py` |
-| `browser_drag` | Drag and drop | `autoqa/concurrency/browser_pool.py` |
+| `browser_check` | Check checkboxes | `web2api/concurrency/browser_pool.py` |
+| `browser_uncheck` | Uncheck checkboxes | `web2api/concurrency/browser_pool.py` |
+| `browser_hover` | Hover over elements | `web2api/concurrency/browser_pool.py` |
+| `browser_drag` | Drag and drop | `web2api/concurrency/browser_pool.py` |
 ### 1.9 JavaScript & Evaluation Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
-| `browser_evaluate` | Execute custom JS | `autoqa/concurrency/browser_pool.py` |
-| `browser_evaluate_on_page` | Evaluate in page context | `autoqa/concurrency/browser_pool.py` |
-| `browser_get_current_url` | Get current URL | `autoqa/concurrency/browser_pool.py` |
-| `browser_get_page_title` | Get page title | `autoqa/concurrency/browser_pool.py` |
+| `browser_evaluate` | Execute custom JS | `web2api/concurrency/browser_pool.py` |
+| `browser_evaluate_on_page` | Evaluate in page context | `web2api/concurrency/browser_pool.py` |
+| `browser_get_current_url` | Get current URL | `web2api/concurrency/browser_pool.py` |
+| `browser_get_page_title` | Get page title | `web2api/concurrency/browser_pool.py` |
 ### 1.10 Network & Performance Commands
 | Owl-Browser Command | Web2API Use Case | Integration File |
 |--------------------|------------------|------------------|
 | `browser_get_network_requests` | Monitor API calls | MODIFY: `builder/discovery/api_detector.py` |
-| `browser_wait_for_response` | Wait for API response | `autoqa/concurrency/browser_pool.py` |
-| `browser_get_console_logs` | Get console errors | `autoqa/concurrency/browser_pool.py` |
-| `browser_get_metrics` | Get performance metrics | `autoqa/concurrency/browser_pool.py` |
+| `browser_wait_for_response` | Wait for API response | `web2api/concurrency/browser_pool.py` |
+| `browser_get_console_logs` | Get console errors | `web2api/concurrency/browser_pool.py` |
+| `browser_get_metrics` | Get performance metrics | `web2api/concurrency/browser_pool.py` |
 ---
 
 
@@ -1514,7 +1514,7 @@ class CredentialStore:
 ## 3. Architecture Transformation Strategy
 ### 3.1 Directory Structure Transformation
 ```
-autoqa/                          web2api/
+web2api/                          web2api/
 ├── api/                         ├── api/
 │   └── main.py                  │   ├── main.py (MODIFY)
 │                                │   ├── service_manager.py (NEW)
@@ -2250,7 +2250,7 @@ await browser.close()
 ```
 
 ### 2.3 Key Features for Web2API
-- ✅ Already integrated in autoqa/concurrency/browser_pool.py
+- ✅ Already integrated in web2api/concurrency/browser_pool.py
 - ✅ Session pooling implemented
 - ✅ Anti-detection active
 - ✅ Natural language selectors ready
@@ -2741,10 +2741,10 @@ CREATE TABLE service_stats (
 5. `orchestrator.py` - Discovery pipeline coordinator
 
 **Reuse from AutoQA:**
-- `autoqa/builder/analyzer/page_analyzer.py`
-- `autoqa/builder/analyzer/visual_analyzer.py`
-- `autoqa/builder/discovery/form_analyzer.py`
-- `autoqa/llm/service.py`
+- `web2api/builder/analyzer/page_analyzer.py`
+- `web2api/builder/analyzer/visual_analyzer.py`
+- `web2api/builder/discovery/form_analyzer.py`
+- `web2api/llm/service.py`
 
 **Tasks:**
 - Implement auth detection (form login focus)
@@ -2764,8 +2764,8 @@ CREATE TABLE service_stats (
 3. `streaming.py` - WebSocket log streaming
 
 **Reuse from AutoQA:**
-- `autoqa/concurrency/browser_pool.py` - Owl-browser pooling
-- `autoqa/runner/self_healing.py` - Selector recovery
+- `web2api/concurrency/browser_pool.py` - Owl-browser pooling
+- `web2api/runner/self_healing.py` - Selector recovery
 
 **Tasks:**
 - Queue-based task processing (no rate limiting)
@@ -2931,7 +2931,7 @@ auth/
 ```
 api/
 ├── __init__.py
-├── main.py                # MODIFY from autoqa/api/main.py
+├── main.py                # MODIFY from web2api/api/main.py
 ├── service_manager.py     # NEW
 ├── openai_compat.py       # NEW
 └── websocket_handler.py   # NEW
@@ -3531,10 +3531,10 @@ CREATE TABLE service_stats (
 5. `discovery/orchestrator.py` - Discovery pipeline coordinator
  
 **Reuse from AutoQA:**
-- `autoqa/builder/analyzer/page_analyzer.py`
-- `autoqa/builder/analyzer/visual_analyzer.py`
-- `autoqa/builder/discovery/form_analyzer.py`
-- `autoqa/llm/service.py`
+- `web2api/builder/analyzer/page_analyzer.py`
+- `web2api/builder/analyzer/visual_analyzer.py`
+- `web2api/builder/discovery/form_analyzer.py`
+- `web2api/llm/service.py`
  
 **Tasks:**
 - Implement auth detection (form login focus)
@@ -3554,8 +3554,8 @@ CREATE TABLE service_stats (
 3. `execution/streaming.py` - WebSocket log streaming
  
 **Reuse from AutoQA:**
-- `autoqa/concurrency/browser_pool.py` - Owl-browser pooling
-- `autoqa/runner/self_healing.py` - Selector recovery
+- `web2api/concurrency/browser_pool.py` - Owl-browser pooling
+- `web2api/runner/self_healing.py` - Selector recovery
  
 **Tasks:**
 - Queue-based task processing (no rate limiting)
@@ -3679,7 +3679,7 @@ auth/
 ```
 api/
 ├── __init__.py
-├── main.py                # MODIFY from autoqa/api/main.py
+├── main.py                # MODIFY from web2api/api/main.py
 ├── service_manager.py     # NEW
 ├── openai_compat.py       # NEW
 └── websocket_handler.py   # NEW

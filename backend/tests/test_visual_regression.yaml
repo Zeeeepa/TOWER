@@ -18,7 +18,7 @@ metadata:
     - enterprise
     - smoke-test
   priority: high
-  owner: autoqa-team
+  owner: web2api-team
 
 environment:
   base_url: https://example.com

@@ -10,7 +10,7 @@ import pytest
 import yaml
 from pydantic import SecretStr
 
-from autoqa.llm.config import (
+from web2api.llm.config import (
     LLMConfig,
     LLMEndpointConfig,
     LLMProvider,

@@ -19,7 +19,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-LICENSE_CC="$PROJECT_ROOT/src/owl_license.cc"
+LICENSE_CC="$PROJECT_ROOT/src/util/owl_license.cc"
 OBFUSCATE_SCRIPT="$SCRIPT_DIR/obfuscate_key.py"
 
 DEFAULT_KEY_PATH="$HOME/.owl_license/owl_license.pub"

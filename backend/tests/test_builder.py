@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from autoqa.builder.test_builder import (
+from web2api.builder.test_builder import (
     AutoTestBuilder,
     BuilderConfig,
     ElementInfo,

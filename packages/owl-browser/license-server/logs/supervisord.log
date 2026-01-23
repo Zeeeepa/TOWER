@@ -1,0 +1,48 @@
+2026-01-22 16:31:16,855 INFO Set uid to user 0 succeeded
+2026-01-22 16:31:16,857 INFO RPC interface 'supervisor' initialized
+2026-01-22 16:31:16,857 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2026-01-22 16:31:16,857 INFO supervisord started with pid 1
+2026-01-22 16:31:17,859 INFO spawned: 'postgresql' with pid 54
+2026-01-22 16:31:17,860 INFO spawned: 'admin-server' with pid 55
+2026-01-22 16:31:17,861 INFO spawned: 'subscription-server' with pid 56
+2026-01-22 16:31:23,242 INFO success: postgresql entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2026-01-22 16:31:30,808 INFO Set uid to user 0 succeeded
+2026-01-22 16:31:31,111 INFO RPC interface 'supervisor' initialized
+2026-01-22 16:31:31,111 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2026-01-22 16:31:31,111 INFO supervisord started with pid 1
+2026-01-22 16:31:32,113 INFO spawned: 'postgresql' with pid 42
+2026-01-22 16:31:32,114 INFO spawned: 'admin-server' with pid 43
+2026-01-22 16:31:32,115 INFO spawned: 'subscription-server' with pid 44
+2026-01-22 16:31:38,109 INFO success: postgresql entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2026-01-22 16:31:42,115 INFO success: admin-server entered RUNNING state, process has stayed up for > than 10 seconds (startsecs)
+2026-01-22 16:31:42,115 INFO success: subscription-server entered RUNNING state, process has stayed up for > than 10 seconds (startsecs)
+2026-01-22 17:12:10,914 WARN received SIGTERM indicating exit request
+2026-01-22 17:12:10,916 INFO waiting for postgresql, admin-server, subscription-server to die
+2026-01-22 17:12:10,919 WARN stopped: admin-server (terminated by SIGTERM)
+2026-01-22 17:12:11,027 INFO stopped: subscription-server (exit status 0)
+2026-01-22 17:12:12,035 INFO stopped: postgresql (exit status 0)
+2026-01-22 17:13:04,690 INFO Set uid to user 0 succeeded
+2026-01-22 17:13:04,693 INFO RPC interface 'supervisor' initialized
+2026-01-22 17:13:04,693 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2026-01-22 17:13:04,693 INFO supervisord started with pid 1
+2026-01-22 17:13:05,695 INFO spawned: 'postgresql' with pid 54
+2026-01-22 17:13:05,696 INFO spawned: 'admin-server' with pid 55
+2026-01-22 17:13:05,697 INFO spawned: 'subscription-server' with pid 56
+2026-01-22 17:13:11,029 INFO success: postgresql entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2026-01-22 17:13:15,981 INFO success: admin-server entered RUNNING state, process has stayed up for > than 10 seconds (startsecs)
+2026-01-22 17:13:15,981 INFO success: subscription-server entered RUNNING state, process has stayed up for > than 10 seconds (startsecs)
+2026-01-22 19:10:02,073 WARN received SIGTERM indicating exit request
+2026-01-22 19:10:02,077 INFO waiting for postgresql, admin-server, subscription-server to die
+2026-01-22 19:10:02,081 WARN stopped: admin-server (terminated by SIGTERM)
+2026-01-22 19:10:02,261 INFO stopped: subscription-server (exit status 0)
+2026-01-22 19:10:02,267 INFO stopped: postgresql (exit status 0)
+2026-01-22 19:10:10,033 INFO Set uid to user 0 succeeded
+2026-01-22 19:10:10,036 INFO RPC interface 'supervisor' initialized
+2026-01-22 19:10:10,036 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2026-01-22 19:10:10,036 INFO supervisord started with pid 1
+2026-01-22 19:10:11,039 INFO spawned: 'postgresql' with pid 42
+2026-01-22 19:10:11,040 INFO spawned: 'admin-server' with pid 43
+2026-01-22 19:10:11,040 INFO spawned: 'subscription-server' with pid 44
+2026-01-22 19:10:16,129 INFO success: postgresql entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2026-01-22 19:10:21,764 INFO success: admin-server entered RUNNING state, process has stayed up for > than 10 seconds (startsecs)
+2026-01-22 19:10:21,764 INFO success: subscription-server entered RUNNING state, process has stayed up for > than 10 seconds (startsecs)
